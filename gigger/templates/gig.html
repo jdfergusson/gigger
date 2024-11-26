@@ -1,0 +1,85 @@
+{% load giggertags %}
+
+<html>
+<head>
+<title>Edit gig</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+th {
+    text-align: right;
+}
+h2 {
+    display: inline;
+}
+</style>
+
+<script type="text/javascript">
+$(function() {
+    $('select').on('change', function() {
+        instrument_id = this.id;
+        player_id = this.value;
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url "assign_player" gig.id %}',
+            data: {
+                instrument_id: instrument_id,
+                player_id: player_id
+            },
+            success: function(data) {
+                console.log(data);
+            }
+        });
+    });
+
+    $("#availability-link").click(function(event) {
+        event.preventDefault();
+        {% url "availability_entry_point" gig.id as relative_url %} 
+        navigator.clipboard.writeText('{% absolute_url relative_url %}');
+    });
+})
+
+
+</script>
+</head>
+<body>
+<h1>{{ gig.title }} - {{ gig.get_status }}</h1>
+<p><a href="{% url 'edit_gig' gig.id %}">Edit details</a> | <a href="{% url 'gigs' %}">Back</a></p>
+<h2>On {{ gig.date }} at {{ gig.location }}</h2>
+
+<p>Contact: {{ gig.contact_name }} - {{ gig.contact_email }}</p>
+<p>Details: {{ gig.details }}</p>
+<p>Total cost: £{{ gig.total_cost }} (£{{ gig.cost_per_player }} × {{ gig.number_of_charging_players }} people + £{{ gig.cost_per_car }} × {{ gig.number_of_cars }} cars + £{{ gig.cost_extras }})
+
+
+<table>
+    {% for instrument in gig.required_instruments.all %}
+
+        {% get_player_assigned_to_instrument gig.id instrument.id as current_player %}
+        <tr>
+            <th>{{ instrument }}</th>
+            <td>
+                <select id="{{ instrument.id }}">
+                    <option value="-1" {% if current_player == -1 %}selected{% endif %}>Choose player...</option>
+                    {% for player in instrument.player_set.all %}
+                        <option value="{{ player.id }}" {% if current_player == player.id %}selected{% endif %}>{{ player }} - {% get_player_availability player.id gig.id %}</option>
+                    {% endfor %}
+                </select>
+            </td>
+        </tr>
+    {% endfor %}
+</table>
+
+<p>
+    <h2>Availability</h2> - <a href="{% url 'availability_entry_point' gig.id %}">Enter availability</a> 
+    <button id='availability-link'>(copy link)</button>
+</p>
+
+<p>
+{% for a in availability %}
+{{ a.player }}: {{ a }}<br>
+{% endfor %}
+
+</body>
+</html>

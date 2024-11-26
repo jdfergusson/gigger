@@ -1,0 +1,95 @@
+{% load giggertags %}
+
+<html>
+<head>
+<title>Edit gig</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+th, td {
+    text-align: center;
+    padding: 5px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+tr {
+    border: 1px solid black;
+}
+
+h2 {
+    display: inline;
+}
+</style>
+
+<script type="text/javascript">
+
+</script>
+</head>
+<body>
+<h1>Nesss's''s Monsters''s gigs</h1>
+
+<h3>Upcoming gigs</h3>
+
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Location</th>
+        <th>Fee</th>
+        <th>Playing</th>
+        <th>Notes</th>
+    </tr>
+            
+    {% for gig in incomplete_gigs %}
+        <tr>
+            <td>{{ gig.date }}</td>
+            <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a></td>
+            <td>{{ gig.get_status }}</td>
+            <td>{{ gig.location }}</td>
+            <td>{{ gig.total_cost }}</td>
+            {% get_players_on_gig gig.id as players_on_gig %} 
+            <td>{% for pag in players_on_gig %}{{pag.player}} - {{pag.instrument}}<br>{%endfor%}</td>
+            <td>{{ gig.details }}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+
+<h3>Complete gigs</h3>
+
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Title</th>
+        <th>Fee</th>
+        <th>Paid</th>
+        <th>Playing</th>
+        <th>Who</th>
+    </tr>
+            
+    {% for gig in complete_gigs %}
+        <tr>
+            <td>{{ gig.date }}</td>
+            <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a></td>
+            <td>{{ gig.total_cost }}</td>
+            <td>{{ gig.paid }}</td>
+            {% get_players_on_gig gig.id as players_on_gig %} 
+            <td>{% for pag in players_on_gig %}{{pag.player}}, {%endfor%}</td>
+        </tr>
+    {% endfor %}
+</table>
+
+<h3>Cancelled gigs</h3>
+<ul>
+    {% for gig in cancelled_gigs %}
+        <li><a href="{% url 'view_gig' gig.id %}">{{ gig.date }} - {{ gig.title }}</a></li>
+    {% endfor %}
+</ul>
+
+
+</body>
+</html>

@@ -1,0 +1,45 @@
+<html>
+<head>
+<title>Edit gig</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+th {
+    text-align: right;
+}
+</style>
+
+<script type="text/javascript">
+$(function() {
+    $('button').click(function() {
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url "availability_set" gig.id player.id %}',
+            data: {
+                availability: this.id,
+                notes: $('#notes').val()
+            },
+            success: function(data) {
+                window.location.href=data.redirect
+            },
+        });
+    });
+})
+</script>
+</head>
+<body>
+<h3>Availability for {{ gig.title }}</h3>
+<h1>Hello {{ player }}</h1>
+<h3>Are you free for on {{ gig.date }} for a gig at {{ gig.location }}?</h3>
+<p>Details: {{ gig.details }}</p>
+
+Add any clarification or notes:
+<input type="text" id="notes" />
+<br>
+Then answer, I am:
+{% for ar in availability_choices %}
+    <button type="button" id="{{ ar.0 }}">{{ ar.1 }}</button>
+{% endfor %}
+</body>
+</html>

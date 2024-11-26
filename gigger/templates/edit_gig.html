@@ -1,0 +1,30 @@
+<html>
+<head>
+<title>Edit gig</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+th {
+    text-align: right;
+}
+</style>
+
+<script type="text/javascript">
+$(function() {
+    $('input').on('change', function () {
+        $('#save_response').text("");
+    });
+})
+</script>
+</head>
+<body>
+<h1>Edit gig details - <span id="gig-title">{{ gig.title }}</span></h1>
+<form method="post">
+    {% csrf_token %}
+    <table>
+        {{ form.as_table }}
+    </table>
+    <input type="submit" value="Save changes"> <span id="save_response"></span>
+</form>
+</body>
+</html>

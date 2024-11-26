@@ -1,0 +1,27 @@
+<html>
+<head>
+<title>Edit gig</title>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<style>
+th {
+    text-align: right;
+}
+</style>
+
+<script type="text/javascript">
+$(function() {
+    $('input').on('change', function () {
+        $('#save_response').text("");
+    });
+})
+</script>
+</head>
+<body>
+<h3>Availability for {{ gig.title }}</h3>
+<h1>Who are you?</h1>
+{% for player in players %}
+    <p><a href="{% url 'availability_form' gig.id player.id %}">{{ player }}</a></p>
+{% endfor %}
+</body>
+</html>

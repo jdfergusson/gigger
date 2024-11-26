@@ -1,0 +1,13 @@
+<html>
+<head>
+<title>Create new gig</title>
+</head>
+<body>
+<h1>Propose a new gig</h1>
+<form action="{% url "create_gig" %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Propose ->">
+</form>
+</body>
+</html>
