@@ -25,3 +25,7 @@ def get_players_on_gig(gig_id):
 def absolute_url(context, relative_url):
   request = context['request']
   return request.build_absolute_uri(relative_url)
+
+@register.simple_tag
+def emoji_from_bool(b):
+    return '✅' if b else '❌'

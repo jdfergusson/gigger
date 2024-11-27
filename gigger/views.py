@@ -3,6 +3,7 @@ from django.http import (
     HttpResponse,
     HttpResponseNotFound,
     JsonResponse,
+    QueryDict,
 )
 from django.urls import reverse
 from django.shortcuts import (
@@ -26,14 +27,16 @@ class EditGigForm(forms.ModelForm):
     required_instruments = forms.ModelMultipleChoiceField(
         queryset=Instrument.objects.all(),
         widget=forms.CheckboxSelectMultiple,
-        required=True)
+        required=False)
     
     class Meta:
         model = Gig
         widgets = {
             'date': forms.DateInput(attrs={'type': 'date'}),
+            'start_time': forms.TimeInput(format='%H:%M', attrs={'type': 'time'}),
         }
-        fields = ["status", "date", "title", "location", "contact_name", "contact_email", "details", 
+        fields = ["status", "date", "title", "location", "contact_name", "contact_email", 
+                  "handled_by", "start_time", "details", 
                   "paid", "cost_per_player", "number_of_charging_players", "cost_per_car", 
                   "number_of_cars", "cost_extras",  "required_instruments"]
     
@@ -61,6 +64,8 @@ def edit_gig(request, gig_id):
 
     if request.method == "POST":
         form = EditGigForm(request.POST, instance=gig)
+        if not form.is_valid():
+            print(form.errors.as_data())
         form.save()
         return redirect(reverse('view_gig', args=[gig.id]))
     else:

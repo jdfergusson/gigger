@@ -6,6 +6,7 @@ from django.db import models
 
 class Instrument(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
+    icon = models.CharField(max_length=5, null=False, blank=False, default="?")
 
     def __str__(self):
         return self.name
@@ -35,7 +36,8 @@ class Gig(models.Model):
     location = models.CharField(max_length=200, blank=True)
     contact_name = models.CharField(max_length=200, blank=True)
     contact_email = models.CharField(max_length=200, blank=True)
-    handled_by = models.ForeignKey(Player, null=True, on_delete=models.SET_NULL)
+    handled_by = models.ForeignKey(Player, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="Band contact")
+    start_time = models.TimeField(blank=True, null=True, verbose_name="Dancing start time")
     details = models.TextField(blank=True)
     
     paid = models.BooleanField(default=False)
@@ -46,7 +48,7 @@ class Gig(models.Model):
     number_of_cars = models.IntegerField(blank=False, default=0)
     cost_extras = models.DecimalField(default=0, max_digits=7, decimal_places=2)
     
-    required_instruments = models.ManyToManyField(Instrument)
+    required_instruments = models.ManyToManyField(Instrument, null=True)
 
     @property
     def total_cost(self):
@@ -56,6 +58,15 @@ class Gig(models.Model):
     
     def get_status(self):
         return self.Status(self.status).label
+    
+    def get_status_icon(self):
+        icons = {
+            'PR': '🟨',
+            'CO': '🟩',
+            'CA': '❌',
+            'DO': '✔️',
+        }
+        return icons.get(self.status, "?")
 
     def __str__(self):
         return self.title

@@ -2,9 +2,17 @@
 
 <html>
 <head>
-<title>Edit gig</title>
+<title>Gigs</title>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Emoji:wght@500&display=swap" rel="stylesheet">
+
+
+
 <style>
 th, td {
     text-align: center;
@@ -22,6 +30,27 @@ tr {
 h2 {
     display: inline;
 }
+
+.player-with-instrument {
+  white-space: nowrap;
+  font-family: "Noto Color Emoji", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  background-color: #aaaaaa;
+  margin-right: 0.5em;
+  margin-top: 0.5em;
+  padding: 0.5em;
+  border-radius: 0.3em;
+  display: inline-block;
+}
+
+.noto-emoji-gigger {
+  font-family: "Noto Emoji", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+}
 </style>
 
 <script type="text/javascript">
@@ -31,14 +60,14 @@ h2 {
 <body>
 <h1>Nesss's''s Monsters''s gigs</h1>
 
-<h3>Upcoming gigs</h3>
+<h3>Upcoming gigs - <a href="{% url 'create_gig' %}">Propose a gig</a></h3>
 
 <table>
     <tr>
         <th>Date</th>
         <th>Title</th>
         <th>Status</th>
-        <th>Location</th>
+        <th>Dancing start</th>
         <th>Fee</th>
         <th>Playing</th>
         <th>Notes</th>
@@ -47,12 +76,12 @@ h2 {
     {% for gig in incomplete_gigs %}
         <tr>
             <td>{{ gig.date }}</td>
-            <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a></td>
-            <td>{{ gig.get_status }}</td>
-            <td>{{ gig.location }}</td>
-            <td>{{ gig.total_cost }}</td>
+            <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a> at {{ gig.location }}</td>
+            <td>{{ gig.get_status_icon }}</td>
+            <td>{% if gig.start_time %}{{ gig.start_time }}{% else %}TBC{% endif %}
+            <td>£{{ gig.total_cost }}</td>
             {% get_players_on_gig gig.id as players_on_gig %} 
-            <td>{% for pag in players_on_gig %}{{pag.player}} - {{pag.instrument}}<br>{%endfor%}</td>
+            <td>{% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}} {{pag.player}}</span>{%endfor%}</td>
             <td>{{ gig.details }}</td>
         </tr>
     {% endfor %}
@@ -67,7 +96,7 @@ h2 {
         <th>Title</th>
         <th>Fee</th>
         <th>Paid</th>
-        <th>Playing</th>
+        <th>Played</th>
         <th>Who</th>
     </tr>
             
@@ -76,7 +105,7 @@ h2 {
             <td>{{ gig.date }}</td>
             <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a></td>
             <td>{{ gig.total_cost }}</td>
-            <td>{{ gig.paid }}</td>
+            <td>{% emoji_from_bool gig.paid %}</td>
             {% get_players_on_gig gig.id as players_on_gig %} 
             <td>{% for pag in players_on_gig %}{{pag.player}}, {%endfor%}</td>
         </tr>

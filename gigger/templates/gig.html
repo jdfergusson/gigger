@@ -2,7 +2,7 @@
 
 <html>
 <head>
-<title>Edit gig</title>
+<title>View gig</title>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <style>
@@ -48,7 +48,8 @@ $(function() {
 <p><a href="{% url 'edit_gig' gig.id %}">Edit details</a> | <a href="{% url 'gigs' %}">Back</a></p>
 <h2>On {{ gig.date }} at {{ gig.location }}</h2>
 
-<p>Contact: {{ gig.contact_name }} - {{ gig.contact_email }}</p>
+{% if gig.start_time %}<p>Dancing starts at {{ gig.start_time }}</p> {% endif %}
+<p>Contact: {{ gig.contact_name }} - {{ gig.contact_email }}. {% if gig.handled_by %} Handled by {{ gig.handled_by }}{% endif %}</p>
 <p>Details: {{ gig.details }}</p>
 <p>Total cost: £{{ gig.total_cost }} (£{{ gig.cost_per_player }} × {{ gig.number_of_charging_players }} people + £{{ gig.cost_per_car }} × {{ gig.number_of_cars }} cars + £{{ gig.cost_extras }})
 
@@ -73,7 +74,7 @@ $(function() {
 
 <p>
     <h2>Availability</h2> - <a href="{% url 'availability_entry_point' gig.id %}">Enter availability</a> 
-    <button id='availability-link'>(copy link)</button>
+    <button id='availability-link'>Copy link</button>
 </p>
 
 <p>

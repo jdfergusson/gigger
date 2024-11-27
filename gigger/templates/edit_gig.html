@@ -11,9 +11,6 @@ th {
 
 <script type="text/javascript">
 $(function() {
-    $('input').on('change', function () {
-        $('#save_response').text("");
-    });
 })
 </script>
 </head>
@@ -24,7 +21,8 @@ $(function() {
     <table>
         {{ form.as_table }}
     </table>
-    <input type="submit" value="Save changes"> <span id="save_response"></span>
+    <input type="submit" value="Save changes">
+    <a href="{% url 'view_gig' gig.id %}">Cancel</a>
 </form>
 </body>
 </html>
