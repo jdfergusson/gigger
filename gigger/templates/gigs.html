@@ -45,6 +45,10 @@ h2 {
   display: inline-block;
 }
 
+.unassigned {
+    background-color: #ff8f8f;
+}
+
 .noto-emoji-gigger {
   font-family: "Noto Emoji", sans-serif;
   font-optical-sizing: auto;
@@ -65,10 +69,9 @@ h2 {
 <table>
     <tr>
         <th>Date</th>
-        <th>Title</th>
+        <th>Details</th>
         <th>Status</th>
-        <th>Dancing start</th>
-        <th>Fee</th>
+        <th>Price</th>
         <th>Playing</th>
         <th>Notes</th>
     </tr>
@@ -76,12 +79,15 @@ h2 {
     {% for gig in incomplete_gigs %}
         <tr>
             <td>{{ gig.date }}</td>
-            <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a> at {{ gig.location }}</td>
+            <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a> at {{ gig.location }}{% if gig.start_time %}, {{ gig.start_time }} start{% endif %}</td>
             <td>{{ gig.get_status_icon }}</td>
-            <td>{% if gig.start_time %}{{ gig.start_time }}{% else %}TBC{% endif %}
             <td>£{{ gig.total_cost }}</td>
             {% get_players_on_gig gig.id as players_on_gig %} 
-            <td>{% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}} {{pag.player}}</span>{%endfor%}</td>
+            {% get_unassigned_instruments gig.id as unassigned_instruments %}
+            <td>
+                {% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}} {{pag.player}}</span>{%endfor%}
+                {% for instrument in unassigned_instruments %}<span class="player-with-instrument unassigned">⚠️ {{ instrument }}</span>{% endfor %}
+            </td>
             <td>{{ gig.details }}</td>
         </tr>
     {% endfor %}
@@ -96,7 +102,6 @@ h2 {
         <th>Title</th>
         <th>Fee</th>
         <th>Paid</th>
-        <th>Played</th>
         <th>Who</th>
     </tr>
             
