@@ -1,6 +1,7 @@
 from ..models import *
 
 from django import template
+import random
 
 
 register = template.Library()
@@ -36,3 +37,7 @@ def absolute_url(context, relative_url):
 @register.simple_tag
 def emoji_from_bool(b):
     return '✅' if b else '❌'
+
+@register.simple_tag
+def apostrophe():
+    return random.choice(["", "'s", "'"] * 50 + ["'s's's's"])
