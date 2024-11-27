@@ -7,9 +7,13 @@ from django.db import models
 class Instrument(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
     icon = models.CharField(max_length=5, null=False, blank=False, default="?")
+    sort_index = models.IntegerField(default=0)
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        ordering = ['sort_index',]
     
     
 class Player(models.Model):
@@ -62,7 +66,7 @@ class Gig(models.Model):
     def get_status_icon(self):
         icons = {
             'PR': '🟨',
-            'CO': '🟩',
+            'CO': '✔️',
             'CA': '❌',
             'DO': '✔️',
         }
