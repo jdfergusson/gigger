@@ -1,5 +1,6 @@
 {% load giggertags %}
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <html>
 <head>
 <title>Gigs</title>
@@ -55,6 +56,14 @@ h2 {
   font-weight: 500;
   font-style: normal;
 }
+
+
+
+@media only screen and (max-width: 1000px) {
+    .t-notes, .t-price {
+        display: none;
+    }
+}
 </style>
 
 <script type="text/javascript">
@@ -68,27 +77,25 @@ h2 {
 
 <table>
     <tr>
-        <th>Date</th>
-        <th>Details</th>
-        <th>Confirmed</th>
-        <th>Price</th>
-        <th>Playing</th>
-        <th>Notes</th>
+        <th class="t-date">Date</th>
+        <th class="t-deets">Details</th>
+        <th class="t-price">Price</th>
+        <th class="t-playing">Playing</th>
+        <th class="t-notes">Notes</th>
     </tr>
             
     {% for gig in incomplete_gigs %}
         <tr>
-            <td>{{ gig.date }}</td>
-            <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a> at {{ gig.location }}{% if gig.start_time %}, {{ gig.start_time }} start{% endif %}</td>
-            <td>{{ gig.get_status_icon }}</td>
-            <td>£{{ gig.total_cost }}</td>
+            <td class="t-date">{{ gig.date }}</td>
+            <td class="t-deets">{{ gig.get_status_icon }} <a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a> at {{ gig.location }}{% if gig.start_time %}, {{ gig.start_time }} start{% endif %}</td>
+            <td class="t-price">£{{ gig.total_cost }}</td>
             {% get_players_on_gig gig.id as players_on_gig %} 
             {% get_unassigned_instruments gig.id as unassigned_instruments %}
-            <td>
+            <td class="t-playing">
                 {% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}} {{pag.player}}</span>{%endfor%}
                 {% for instrument in unassigned_instruments %}<span class="player-with-instrument unassigned">⚠️ {{ instrument }}</span>{% endfor %}
             </td>
-            <td>{{ gig.details }}</td>
+            <td class="t-notes">{{ gig.details }}</td>
         </tr>
     {% endfor %}
 </table>
