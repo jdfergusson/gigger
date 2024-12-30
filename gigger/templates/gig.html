@@ -7,14 +7,78 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 <style>
 th {
-    text-align: right;
+    text-align: center;
 }
 h2 {
     display: inline;
 }
+#link-copied {
+    transition: opacity 0.3s linear;
+}
+.hidden {
+    opacity: 0;
+}
+.active {
+    opacity: 1;
+}
+#availability-link {
+    padding: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+#availability-enter {
+}
+
+
+@media only screen and (max-width: 1000px) {
+    body, input, textarea, select {
+        font-size: 14pt;
+    }
+    label {
+        display: block;
+        min-width: 40em;
+    }
+    div {
+        padding-top: 0.5em;
+    }
+
+    input, textarea, select {
+        width: 100%;
+    }
+
+    input[type=checkbox] {
+        zoom: 1.5;
+        width: auto;
+    }
+
+    td {
+        padding-bottom: 5px;
+        padding-top: 5px;
+    }
+}
 </style>
 
 <script type="text/javascript">
+function copyToClipboard(text) {
+    var dummy = document.createElement("textarea");
+    document.body.appendChild(dummy);
+    dummy.value = text;
+    if (navigator.userAgent.match(/ipad|ipod|iphone/i)) {
+        dummy.contentEditable = true;
+        dummy.readOnly = true;
+        var range = document.createRange();
+        range.selectNodeContents(dummy);
+        var selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        el.setSelectionRange(0, 999999);
+    }
+    else {
+        dummy.select();
+    }
+    document.execCommand("copy");
+    document.body.removeChild(dummy);
+}
 $(function() {
     $('select').on('change', function() {
         instrument_id = this.id;
@@ -35,12 +99,15 @@ $(function() {
 
     $("#availability-link").click(function(event) {
         event.preventDefault();
+        $("#link-copied").removeClass("hidden");
+        setTimeout(function() {
+            $("#link-copied").addClass("hidden");
+        }, 3000);
         {% url "availability_entry_point" gig.id as relative_url %} 
-        navigator.clipboard.writeText('{% absolute_url relative_url %}');
+        copyToClipboard('{% absolute_url relative_url %}');
+
     });
 })
-
-
 </script>
 </head>
 <body>
@@ -53,13 +120,14 @@ $(function() {
 <p>Details: {{ gig.details }}</p>
 <p>Total cost: £{{ gig.total_cost }} (£{{ gig.cost_per_player }} × {{ gig.number_of_charging_players }} people + £{{ gig.cost_per_car }} × {{ gig.number_of_cars }} cars + £{{ gig.cost_extras }})
 
+<h2>Players</h2>
 
 <table>
     {% for instrument in gig.required_instruments.all %}
 
         {% get_player_assigned_to_instrument gig.id instrument.id as current_player %}
         <tr>
-            <th>{{ instrument }}</th>
+            <th>{{ instrument }} {{ instrument.icon }}</th>
             <td>
                 <select id="{{ instrument.id }}">
                     <option value="-1" {% if current_player == -1 %}selected{% endif %}>Choose player...</option>
@@ -73,14 +141,19 @@ $(function() {
 </table>
 
 <p>
-    <h2>Availability</h2> - <a href="{% url 'availability_entry_point' gig.id %}">Enter availability</a> 
-    <button id='availability-link'>Copy link</button>
+    <h2>Availability</h2>
 </p>
 
 <p>
-{% for a in availability %}
-{{ a.player }}: {{ a }}<br>
-{% endfor %}
+    {% for a in availability %}
+    {{ a.player }}: {{ a }} {% if a.notes %}({{ a.notes }}){% endif %}<br>
+    {% endfor %}
+</p>
+
+<p>
+    <span id="availability-enter"><a href="{% url 'availability_entry_point' gig.id %}">Enter my availability</a></span> 
+    <button id='availability-link'>🔗</button><span id="link-copied" class="hidden">Link copied</span>
+</p>
 
 </body>
 </html>

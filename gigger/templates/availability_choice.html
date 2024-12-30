@@ -8,6 +8,16 @@
 th {
     text-align: right;
 }
+
+@media only screen and (max-width: 1000px) {
+    body, input, button {
+        font-size: 14pt;
+    }
+
+    button {
+        padding: 5px;
+    }
+}
 </style>
 
 <script type="text/javascript">
@@ -35,12 +45,15 @@ $(function() {
 <h3>Are you free for on {{ gig.date }} for a gig at {{ gig.location }}?</h3>
 <p>Details: {{ gig.details }}</p>
 
-Add any clarification or notes:
-<input type="text" id="notes" />
-<br>
-Then answer, I am:
-{% for ar in availability_choices %}
-    <button type="button" id="{{ ar.0 }}">{{ ar.1 }}</button>
-{% endfor %}
+<p>
+    Add any clarification or notes:<br>
+    <input type="text" id="notes" />
+</p>
+<p>
+    Then answer, I am:<br>
+    {% for ar in availability_choices %}
+        <button type="button" id="{{ ar.0 }}">{{ ar.1 }}</button>
+    {% endfor %}
+</p>
 </body>
 </html>

@@ -8,6 +8,28 @@
 th {
     text-align: right;
 }
+
+@media only screen and (max-width: 1000px) {
+    body, input, textarea, select {
+        font-size: 14pt;
+    }
+    label {
+        display: block;
+        min-width: 40em;
+    }
+    div {
+        padding-top: 0.5em;
+    }
+
+    input, textarea, select {
+        width: 100%;
+    }
+
+    input[type=checkbox] {
+        zoom: 1.5;
+        width: auto;
+    }
+}
 </style>
 
 <script type="text/javascript">
@@ -20,10 +42,12 @@ $(function() {
 <form method="post">
     {% csrf_token %}
     <table>
-        {{ form.as_table }}
+        {{ form.as_p }}
     </table>
     <input type="submit" value="Save changes">
-    <a href="{% url 'view_gig' gig.id %}">Cancel</a>
+    <p>
+        <a href="{% url 'view_gig' gig.id %}">Cancel</a>
+    </p>
 </form>
 </body>
 </html>
