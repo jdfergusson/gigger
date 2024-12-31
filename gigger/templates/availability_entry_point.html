@@ -1,46 +1,24 @@
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<html>
-<head>
-<title>Enter availability for {{ gig.title }}</title>
+{% extends "base.html" %}
+{% load giggertags %}
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<style>
-th {
-    text-align: right;
-}
+{% block title %}Enter availability for {{ gig.title }}{% endblock title %}
 
-@media only screen and (max-width: 1000px) {
-    body {
-        font-size: 14pt;
-    }
-
-    .player-name {
-        display: inline-block;
-        padding: 5px;
-        border: 2px solid grey;
-        border-radius: 5px;
-        margin: 5px;
-    }
-
-    .player-name a {
-        text-decoration: none;
-    }
-}
-</style>
-
+{% block js %}
 <script type="text/javascript">
 $(function() {
     $('input').on('change', function () {
         $('#save_response').text("");
     });
 })
-</script>
-</head>
-<body>
+{% endblock js %}
+
+
+{% block content %}
+
 <h3>Availability for {{ gig.title }}</h3>
 <h1>Who are you?</h1>
 {% for player in players %}
     <span class="player-name"><a href="{% url 'availability_form' gig.id player.id %}">{{ player }}</a></span>
 {% endfor %}
-</body>
-</html>
+
+{% endblock content %}

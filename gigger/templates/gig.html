@@ -1,159 +1,92 @@
+{% extends "base.html" %}
 {% load giggertags %}
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<html>
-<head>
-<title>View gig</title>
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<style>
-th {
-    text-align: center;
-}
-h2 {
-    display: inline;
-}
-#link-copied {
-    transition: opacity 0.3s linear;
-}
-.hidden {
-    opacity: 0;
-}
-.active {
-    opacity: 1;
-}
-#availability-link {
-    padding: 10px;
-    margin-left: 10px;
-    margin-right: 10px;
-}
-#availability-enter {
-}
+{% block title %}View gig{% endblock title %}
 
-
-@media only screen and (max-width: 1000px) {
-    body, input, textarea, select {
-        font-size: 14pt;
-    }
-    label {
-        display: block;
-        min-width: 40em;
-    }
-    div {
-        padding-top: 0.5em;
-    }
-
-    input, textarea, select {
-        width: 100%;
-    }
-
-    input[type=checkbox] {
-        zoom: 1.5;
-        width: auto;
-    }
-
-    td {
-        padding-bottom: 5px;
-        padding-top: 5px;
-    }
-}
-</style>
-
-<script type="text/javascript">
-function copyToClipboard(text) {
-    var dummy = document.createElement("textarea");
-    document.body.appendChild(dummy);
-    dummy.value = text;
-    if (navigator.userAgent.match(/ipad|ipod|iphone/i)) {
-        dummy.contentEditable = true;
-        dummy.readOnly = true;
-        var range = document.createRange();
-        range.selectNodeContents(dummy);
-        var selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
-        el.setSelectionRange(0, 999999);
-    }
-    else {
-        dummy.select();
-    }
-    document.execCommand("copy");
-    document.body.removeChild(dummy);
-}
-$(function() {
-    $('select').on('change', function() {
-        instrument_id = this.id;
-        player_id = this.value;
-        $.ajax({
-            type: 'POST',
-            headers: { "X-CSRFToken": '{{ csrf_token }}' },
-            url: '{% url "assign_player" gig.id %}',
-            data: {
-                instrument_id: instrument_id,
-                player_id: player_id
-            },
-            success: function(data) {
-                console.log(data);
-            }
+{% block js %}
+    $(function() {
+        $('select').on('change', function() {
+            instrument_id = this.id;
+            player_id = this.value;
+            $.ajax({
+                type: 'POST',
+                headers: { "X-CSRFToken": '{{ csrf_token }}' },
+                url: '{% url "assign_player" gig.id %}',
+                data: {
+                    instrument_id: instrument_id,
+                    player_id: player_id
+                },
+                success: function(data) {
+                    console.log(data);
+                }
+            });
         });
-    });
 
-    $("#availability-link").click(function(event) {
-        event.preventDefault();
-        $("#link-copied").removeClass("hidden");
-        setTimeout(function() {
-            $("#link-copied").addClass("hidden");
-        }, 3000);
-        {% url "availability_entry_point" gig.id as relative_url %} 
-        copyToClipboard('{% absolute_url relative_url %}');
+        $("#availability-link").click(function(event) {
+            event.preventDefault();
+            $("#link-copied").removeClass("hidden");
+            setTimeout(function() {
+                $("#link-copied").addClass("hidden");
+            }, 3000);
+            {% url "availability_entry_point" gig.id as relative_url %} 
+            copyToClipboard('{% absolute_url relative_url %}');
 
-    });
-})
-</script>
-</head>
-<body>
-<h1>{{ gig.title }} - {{ gig.get_status }}</h1>
-<p><a href="{% url 'edit_gig' gig.id %}">Edit details</a> | <a href="{% url 'gigs' %}">Back</a></p>
-<h2>On {{ gig.date }} at {{ gig.location }}</h2>
+        });
+    })
+{% endblock js %}
 
-{% if gig.start_time %}<p>Dancing starts at {{ gig.start_time }}</p> {% endif %}
-<p>Contact: {{ gig.contact_name }} - {{ gig.contact_email }}. {% if gig.handled_by %} Handled by {{ gig.handled_by }}{% endif %}</p>
-<p>Details: {{ gig.details }}</p>
-<p>Total cost: £{{ gig.total_cost }} (£{{ gig.cost_per_player }} × {{ gig.number_of_charging_players }} people + £{{ gig.cost_per_car }} × {{ gig.number_of_cars }} cars + £{{ gig.cost_extras }})
+{% block css %}
 
-<h2>Players</h2>
+    #availability-link {
+        padding: 10px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+{% endblock css %}
 
-<table>
-    {% for instrument in gig.required_instruments.all %}
+{% block content %}
+    <h1>{{ gig.title }} - {{ gig.get_status }} {{ gig.get_status_icon }}</h1>
+    <p><a href="{% url 'edit_gig' gig.id %}">Edit details</a> | <a href="{% url 'gigs' %}">Back</a></p>
+    <h2>On {{ gig.date }} at {{ gig.location }}</h2>
 
-        {% get_player_assigned_to_instrument gig.id instrument.id as current_player %}
-        <tr>
-            <th>{{ instrument }} {{ instrument.icon }}</th>
-            <td>
-                <select id="{{ instrument.id }}">
-                    <option value="-1" {% if current_player == -1 %}selected{% endif %}>Choose player...</option>
-                    {% for player in instrument.player_set.all %}
-                        <option value="{{ player.id }}" {% if current_player == player.id %}selected{% endif %}>{{ player }} - {% get_player_availability player.id gig.id %}</option>
-                    {% endfor %}
-                </select>
-            </td>
-        </tr>
-    {% endfor %}
-</table>
+    {% if gig.start_time %}<p>Dancing starts at {{ gig.start_time }}</p> {% endif %}
+    <p>Contact: {{ gig.contact_name }} - {{ gig.contact_email }}. {% if gig.handled_by %} Handled by {{ gig.handled_by }}{% endif %}</p>
+    <p>Details: {{ gig.details }}</p>
+    <p>Total cost: £{{ gig.total_cost }} (£{{ gig.cost_per_player }} × {{ gig.number_of_charging_players }} people + £{{ gig.cost_per_car }} × {{ gig.number_of_cars }} cars + £{{ gig.cost_extras }})
 
-<p>
-    <h2>Availability</h2>
-</p>
+    <h2>Players</h2>
 
-<p>
-    {% for a in availability %}
-    {{ a.player }}: {{ a }} {% if a.notes %}({{ a.notes }}){% endif %}<br>
-    {% endfor %}
-</p>
+    <table>
+        {% for instrument in gig.required_instruments.all %}
 
-<p>
-    <span id="availability-enter"><a href="{% url 'availability_entry_point' gig.id %}">Enter my availability</a></span> 
-    <button id='availability-link'>🔗</button><span id="link-copied" class="hidden">Link copied</span>
-</p>
+            {% get_player_assigned_to_instrument gig.id instrument.id as current_player %}
+            <tr>
+                <th>{{ instrument }} {{ instrument.icon }}</th>
+                <td>
+                    <select id="{{ instrument.id }}">
+                        <option value="-1" {% if current_player == -1 %}selected{% endif %}>Choose player...</option>
+                        {% for player in instrument.player_set.all %}
+                            <option value="{{ player.id }}" {% if current_player == player.id %}selected{% endif %}>{{ player }} - {% get_player_availability player.id gig.id %}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
 
-</body>
-</html>
+    <p>
+        <h2>Availability</h2>
+    </p>
+
+    <p>
+        {% for a in availability %}
+        {{ a.player }}: {{ a }} {% if a.notes %}({{ a.notes }}){% endif %}<br>
+        {% endfor %}
+    </p>
+
+    <p>
+        <span id="availability-enter"><a href="{% url 'availability_entry_point' gig.id %}">Enter my availability</a></span> 
+        <button id='availability-link'>🔗</button><span id="link-copied" class="hidden fader">Link copied</span>
+    </p>
+
+{% endblock content %}

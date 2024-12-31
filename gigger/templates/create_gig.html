@@ -1,25 +1,23 @@
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<html>
-<head>
-<title>Create new gig</title>
-<style>
-    @media only screen and (max-width: 1000px) {
-        body, input {
-            font-size: 16pt;
-        }
+{% extends "base.html" %}
+{% load giggertags %}
 
-        #propose-btn {
-            padding: 0.5em;
-        }
+{% block title %}Create new gig{% endblock title %}
+
+{% block css %}
+    #propose-btn {
+        padding: 0.5em;
     }
-</style>
-</head>
-<body>
-<h1>Propose a new gig</h1>
-<form action="{% url "create_gig" %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type="submit" value="Propose ->" id="propose-btn">
-</form>
-</body>
-</html>
+{% endblock css %}
+
+
+{% block content %}
+    <h1>Propose a new gig</h1>
+    <form action="{% url "create_gig" %}" method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <div class="side-by-side-container">
+            <input type="submit" value="Propose" id="propose-btn" class="btn-good side-by-side-element">
+            <button onclick="window.location.href='{% url 'gigs' %}';" class="btn-bad side-by-side-element">Cancel</button>
+        </div>
+    </form>
+{% endblock content %}

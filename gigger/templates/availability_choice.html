@@ -1,26 +1,9 @@
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<html>
-<head>
-<title>Enter availability for {{ gig.title }}</title>
+{% extends "base.html" %}
+{% load giggertags %}
 
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-<style>
-th {
-    text-align: right;
-}
+{% block title %}Enter availability for {{ gig.title }}{% endblock title %}
 
-@media only screen and (max-width: 1000px) {
-    body, input, button {
-        font-size: 14pt;
-    }
-
-    button {
-        padding: 5px;
-    }
-}
-</style>
-
-<script type="text/javascript">
+{% block js %}
 $(function() {
     $('button').click(function() {
         $.ajax({
@@ -37,9 +20,9 @@ $(function() {
         });
     });
 })
-</script>
-</head>
-<body>
+{% endblock js %}
+
+{% block content %}
 <h3>Availability for {{ gig.title }}</h3>
 <h1>Hello {{ player }}</h1>
 <h3>Are you free for on {{ gig.date }} for a gig at {{ gig.location }}?</h3>
@@ -55,5 +38,4 @@ $(function() {
         <button type="button" id="{{ ar.0 }}">{{ ar.1 }}</button>
     {% endfor %}
 </p>
-</body>
-</html>
+{% endblock content %}

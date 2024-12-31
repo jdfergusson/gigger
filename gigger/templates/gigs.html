@@ -1,134 +1,121 @@
+{% extends "base.html" %}
 {% load giggertags %}
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<html>
-<head>
-<title>Gigs</title>
-
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&family=Noto+Emoji:wght@500&display=swap" rel="stylesheet">
+{% block title %}Gigs{% endblock title %}}
 
 
+{% block css %}
 
-<style>
-th, td {
-    text-align: center;
-    padding: 5px;
-}
+    table {
+        border-collapse: collapse;
+    }
 
-table {
-    border-collapse: collapse;
-}
+    tr {
+        border: 1px solid black;
+    }
 
-tr {
-    border: 1px solid black;
-}
+    h2 {
+        display: inline;
+    }
 
-h2 {
-    display: inline;
-}
+    .player-with-instrument {
+        white-space: nowrap;
+        font-family: "Noto Color Emoji", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: normal;
+        background-color: #aaaaaa;
+        word-spacing: 0;
+        padding: 0.5em;
+        border-radius: 0.3em;
+        display: inline-block;
+        margin: 0.25em;
+    }
 
-.player-with-instrument {
-  white-space: nowrap;
-  font-family: "Noto Color Emoji", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
-  background-color: #aaaaaa;
-  margin-right: 0.5em;
-  margin-top: 0.5em;
-  padding: 0.5em;
-  border-radius: 0.3em;
-  display: inline-block;
-}
+    .unassigned {
+        background-color: #ff8f8f;
+    }
 
-.unassigned {
-    background-color: #ff8f8f;
-}
+    .noto-emoji-gigger {
+        font-family: "Noto Emoji", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 500;
+        font-style: normal;
+    }
 
-.noto-emoji-gigger {
-  font-family: "Noto Emoji", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 500;
-  font-style: normal;
-}
+    .player-container {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: center;
+    }
+{% endblock css %}
 
-@media only screen and (max-width: 1000px) {
+{% block mobilecss %}
     .t-notes, .t-price {
         display: none;
     }
-}
-</style>
+{% endblock mobilecss %}
 
-<script type="text/javascript">
+{% block content %}
+    <h1>Ness{% apostrophe %} Monsters Gigs</h1>
 
-</script>
-</head>
-<body>
-<h1>Ness{% apostrophe %} Monsters Gigs</h1>
+    <h3>Upcoming gigs - <a href="{% url 'create_gig' %}">Propose a gig</a></h3>
 
-<h3>Upcoming gigs - <a href="{% url 'create_gig' %}">Propose a gig</a></h3>
-
-<table>
-    <tr>
-        <th class="t-date">Date</th>
-        <th class="t-deets">Details</th>
-        <th class="t-price">Price</th>
-        <th class="t-playing">Playing</th>
-        <th class="t-notes">Notes</th>
-    </tr>
-            
-    {% for gig in incomplete_gigs %}
+    <table>
         <tr>
-            <td class="t-date">{{ gig.date }}</td>
-            <td class="t-deets">{{ gig.get_status_icon }} <a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a> at {{ gig.location }}{% if gig.start_time %}, {{ gig.start_time }} start{% endif %}</td>
-            <td class="t-price">£{{ gig.total_cost }}</td>
-            {% get_players_on_gig gig.id as players_on_gig %} 
-            {% get_unassigned_instruments gig.id as unassigned_instruments %}
-            <td class="t-playing">
-                {% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}} {{pag.player}}</span>{%endfor%}
-                {% for instrument in unassigned_instruments %}<span class="player-with-instrument unassigned">⚠️ {{ instrument }}</span>{% endfor %}
-            </td>
-            <td class="t-notes">{{ gig.details }}</td>
+            <th class="t-date">When</th>
+            <th class="t-deets">Details</th>
+            <th class="t-price">Price</th>
+            <th class="t-playing">Playing</th>
+            <th class="t-notes">Notes</th>
         </tr>
-    {% endfor %}
-</table>
+                
+        {% for gig in incomplete_gigs %}
+            <tr>
+                <td class="t-date"><a href="{% url 'view_gig' gig.id %}">{{ gig.date | date:"l d/m/Y" }}{% if gig.start_time %}<br><br>{{ gig.start_time }} dancing start{% endif %}</a></td>
+                <td class="t-deets">{{ gig.get_status_icon }} <a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a>{% if gig.location %}<br><br>{{ gig.location }}{% endif %}{% if gig.details %}<p class="mob-only">{{ gig.details }}{%endif%}</td>
+                <td class="t-price">£{{ gig.total_cost }}</td>
+                {% get_players_on_gig gig.id as players_on_gig %} 
+                {% get_unassigned_instruments gig.id as unassigned_instruments %}
+                <td class="t-playing">
+                    <div class="player-container">
+                        {% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}} {{pag.player}}</span>{%endfor%}
+                        {% for instrument in unassigned_instruments %}<span class="player-with-instrument unassigned">⚠️ {{ instrument }}</span>{% endfor %}
+                    </div>
+                </td>
+                <td class="t-notes">{{ gig.details }}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
 
-<h3>Complete gigs</h3>
+    <h3>Complete gigs</h3>
 
-<table>
-    <tr>
-        <th>Date</th>
-        <th>Title</th>
-        <th>Fee</th>
-        <th>Paid</th>
-        <th>Who</th>
-    </tr>
-            
-    {% for gig in complete_gigs %}
+    <table>
         <tr>
-            <td>{{ gig.date }}</td>
-            <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a></td>
-            <td>{{ gig.total_cost }}</td>
-            <td>{% emoji_from_bool gig.paid %}</td>
-            {% get_players_on_gig gig.id as players_on_gig %} 
-            <td>{% for pag in players_on_gig %}{{pag.player}}, {%endfor%}</td>
+            <th>Date</th>
+            <th>Title</th>
+            <th>Fee</th>
+            <th>Paid</th>
+            <th>Who</th>
         </tr>
-    {% endfor %}
-</table>
+                
+        {% for gig in complete_gigs %}
+            <tr>
+                <td>{{ gig.date }}</td>
+                <td><a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a></td>
+                <td>{{ gig.total_cost }}</td>
+                <td>{% emoji_from_bool gig.paid %}</td>
+                {% get_players_on_gig gig.id as players_on_gig %} 
+                <td>{% for pag in players_on_gig %}{{pag.player}}, {%endfor%}</td>
+            </tr>
+        {% endfor %}
+    </table>
 
-<h3>Cancelled gigs</h3>
-<ul>
-    {% for gig in cancelled_gigs %}
-        <li><a href="{% url 'view_gig' gig.id %}">{{ gig.date }} - {{ gig.title }}</a></li>
-    {% endfor %}
-</ul>
-
-
-</body>
-</html>
+    <h3>Cancelled gigs</h3>
+    <ul>
+        {% for gig in cancelled_gigs %}
+            <li><a href="{% url 'view_gig' gig.id %}">{{ gig.date }} - {{ gig.title }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock content %}
