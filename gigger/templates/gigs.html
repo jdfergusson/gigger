@@ -59,7 +59,20 @@
 {% block content %}
     <h1>Ness{% apostrophe %} Monsters Gigs</h1>
 
-    <h3>Upcoming gigs - <a href="{% url 'create_gig' %}">Propose a gig</a></h3>
+    {% if user %}
+        <h3> Hello {{ user }}</h3>
+        <ul>
+            <li><a href="{% url 'my_gigs' %}">View gigs you're playing for</a></li>
+            <li><a href="{% url 'my_missing_availability' %}">View gigs you haven't given your availability for</a></li>
+        </ul>
+    {% else %}
+        <h3>Hello!</h3>
+        <a href="{% url 'who_am_i' %}">Who are you?</a>
+    {% endif %}
+
+    <hr />
+
+    <h3>All upcoming gigs - <a href="{% url 'create_gig' %}">Propose a gig</a></h3>
 
     <table>
         <tr>
@@ -79,8 +92,8 @@
                 {% get_unassigned_instruments gig.id as unassigned_instruments %}
                 <td class="t-playing">
                     <div class="player-container">
-                        {% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}} {{pag.player}}</span>{%endfor%}
-                        {% for instrument in unassigned_instruments %}<span class="player-with-instrument unassigned">⚠️ {{ instrument }}</span>{% endfor %}
+                        {% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}}{{pag.player}}</span>{%endfor%}
+                        {% for instrument in unassigned_instruments %}<span class="player-with-instrument unassigned">⚠️{{ instrument }}</span>{% endfor %}
                     </div>
                 </td>
                 <td class="t-notes">{{ gig.details }}</td>
@@ -88,6 +101,7 @@
         {% endfor %}
     </table>
 
+    <hr />
 
     <h3>Complete gigs</h3>
 
@@ -111,6 +125,8 @@
             </tr>
         {% endfor %}
     </table>
+
+    <hr />
 
     <h3>Cancelled gigs</h3>
     <ul>

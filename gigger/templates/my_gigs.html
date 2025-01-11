@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load giggertags %}
+
+{% block title %}Gigs{% endblock title %}}
+
+
+{% block css %}
+
+    table {
+        border-collapse: collapse;
+    }
+
+    tr {
+        border: 1px solid black;
+    }
+
+    h2 {
+        display: inline;
+    }
+
+    .player-with-instrument {
+        white-space: nowrap;
+        font-family: "Noto Color Emoji", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: normal;
+        background-color: #aaaaaa;
+        word-spacing: 0;
+        padding: 0.5em;
+        border-radius: 0.3em;
+        display: inline-block;
+        margin: 0.25em;
+    }
+
+    .unassigned {
+        background-color: #ff8f8f;
+    }
+
+    .noto-emoji-gigger {
+        font-family: "Noto Emoji", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 500;
+        font-style: normal;
+    }
+
+    .player-container {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: center;
+    }
+{% endblock css %}
+
+{% block mobilecss %}
+    .t-notes, .t-price {
+        display: none;
+    }
+{% endblock mobilecss %}
+
+{% block content %}
+    <h1>{{ user }}'s upcoming gigs</h1>
+    <p>
+        <a href="{% url 'home' %}">Back</a> | <a href="{% url 'who_am_i' %}">Not you?</a>
+    </p>
+
+    <table>
+        <tr>
+            <th class="t-date">When</th>
+            <th class="t-deets">Details</th>
+            <th class="t-playing">Playing</th>
+            <th class="t-notes">Notes</th>
+        </tr>
+                
+        {% for gig in gigs %}
+            <tr>
+                <td class="t-date"><a href="{% url 'view_gig' gig.id %}">{{ gig.date | date:"l d/m/Y" }}</a></td>
+                <td class="t-deets">{{ gig.get_status_icon }} <a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a></td>
+                <td class="t-playing">
+                    <div class="player-container">
+                        
+                        {% get_what_user_is_playing_at_gig gig user as instruments%}
+                        {% for instrument in instruments %}<span class="player-with-instrument">{{instrument.icon}}{{instrument.name}}</span>{% endfor %}
+                    </div>
+                </td>
+                <td class="t-notes">{{ gig.details }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+
+{% endblock content %}

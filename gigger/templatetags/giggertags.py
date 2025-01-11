@@ -29,6 +29,13 @@ def get_unassigned_instruments(gig_id):
     instruments = [i for i in gig.required_instruments.all() if i not in pags]
     return instruments
 
+@register.simple_tag
+def get_what_user_is_playing_at_gig(gig, user):
+    pags = PlayingAtGig.objects.filter(gig=gig, player=user)
+    instruments = [pag.instrument for pag in pags]
+    print(instruments)
+    return instruments
+
 @register.simple_tag(takes_context=True)
 def absolute_url(context, relative_url):
   request = context['request']

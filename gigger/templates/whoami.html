@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load giggertags %}
+
+{% block title %}Identify yourself!{% endblock title %}
+
+{% block js %}
+<script type="text/javascript">
+$(function() {
+    $('input').on('change', function () {
+        $('#save_response').text("");
+    });
+})
+{% endblock js %}
+
+
+{% block content %}
+
+{% if user %}
+    <h3>Hello {{ user.name }}</h3>
+    Not you? Please select your name from the list below:
+{% else %}
+    <h3>Hello!</h3>
+    Please select your name from the list below:
+{% endif %}
+
+<p>
+    {% for player in players %}
+        <span class="player-name"><a href="{% url 'i_am' player.id %}">{{ player }}</a></span>
+    {% endfor %}
+</p>
+
+{% endblock content %}

@@ -24,7 +24,8 @@ $(function() {
 
 {% block content %}
 <h3>Availability for {{ gig.title }}</h3>
-<h1>Hello {{ player }}</h1>
+<h1>Hello {{ player }} <a href="{% url 'who_am_i' %}" class="tiny">(not you?)</a></h1>
+
 <h3>Are you free for on {{ gig.date }} for a gig at {{ gig.location }}?</h3>
 <p>Details: {{ gig.details }}</p>
 

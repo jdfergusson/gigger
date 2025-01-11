@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load giggertags %}
+
+{% block title %}Gigs{% endblock title %}}
+
+
+{% block css %}
+
+    table {
+        border-collapse: collapse;
+    }
+
+    tr {
+        border: 1px solid black;
+    }
+
+    h2 {
+        display: inline;
+    }
+
+    .player-with-instrument {
+        white-space: nowrap;
+        font-family: "Noto Color Emoji", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 400;
+        font-style: normal;
+        background-color: #aaaaaa;
+        word-spacing: 0;
+        padding: 0.5em;
+        border-radius: 0.3em;
+        display: inline-block;
+        margin: 0.25em;
+    }
+
+    .unassigned {
+        background-color: #ff8f8f;
+    }
+
+    .noto-emoji-gigger {
+        font-family: "Noto Emoji", sans-serif;
+        font-optical-sizing: auto;
+        font-weight: 500;
+        font-style: normal;
+    }
+
+    .player-container {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: center;
+    }
+{% endblock css %}
+
+{% block mobilecss %}
+    .t-notes, .t-price {
+        display: none;
+    }
+{% endblock mobilecss %}
+
+{% block content %}
+    <h1>Gigs for which {{ user }} hasn't filled in their availability</h1>
+    <p>
+        <a href="{% url 'home' %}">Back</a> | <a href="{% url 'who_am_i' %}">Not you?</a>
+    </p>
+
+    
+
+    <ul>
+        {% for gig in gigs %}
+            <li>{{ gig.get_status_icon }}<a href="{% url 'view_gig' gig.id %}">{{ gig.title }}, {{ gig.date | date:"l d/m/Y" }}</li>
+        {% endfor %}
+    </ul>
+
+{% endblock content %}

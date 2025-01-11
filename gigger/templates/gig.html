@@ -54,6 +54,35 @@
     <p>Details: {{ gig.details }}</p>
     <p>Total cost: £{{ gig.total_cost }} (£{{ gig.cost_per_player }} × {{ gig.number_of_charging_players }} people + £{{ gig.cost_per_car }} × {{ gig.number_of_cars }} cars + £{{ gig.cost_extras }})
 
+    
+
+    <p>
+        <h2>Availability</h2>
+    </p>
+
+    <p>
+        {% for a in availability %}
+        {{ a.player }}: {{ a }} {% if a.notes %}({{ a.notes }}){% endif %}<br>
+        {% endfor %}
+    </p>
+
+    <p>
+        
+        <span id="availability-enter">
+
+            {% if user %}
+                {% url 'availability_form' gig.id user.id as url %}
+            {% else %}
+                {% url 'availability_entry_point' gig.id as url %}
+            {% endif %}
+
+            <a href="{{ url }}">
+                Enter my availability
+            </a>
+        </span> 
+        <button id='availability-link'>🔗</button><span id="link-copied" class="hidden fader">Link copied</span>
+    </p>
+
     <h2>Players</h2>
 
     <table>
@@ -73,20 +102,5 @@
             </tr>
         {% endfor %}
     </table>
-
-    <p>
-        <h2>Availability</h2>
-    </p>
-
-    <p>
-        {% for a in availability %}
-        {{ a.player }}: {{ a }} {% if a.notes %}({{ a.notes }}){% endif %}<br>
-        {% endfor %}
-    </p>
-
-    <p>
-        <span id="availability-enter"><a href="{% url 'availability_entry_point' gig.id %}">Enter my availability</a></span> 
-        <button id='availability-link'>🔗</button><span id="link-copied" class="hidden fader">Link copied</span>
-    </p>
 
 {% endblock content %}
