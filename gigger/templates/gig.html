@@ -32,6 +32,14 @@
             copyToClipboard('{% absolute_url relative_url %}');
 
         });
+
+        $("#select-players").hide();
+
+        $("#unlock-player-changes").click(function(event) {
+            event.preventDefault();
+            $("#select-players").show();
+            $("#view-players").hide();
+        });
     })
 {% endblock js %}
 
@@ -85,22 +93,33 @@
 
     <h2>Players</h2>
 
-    <table>
-        {% for instrument in gig.required_instruments.all %}
+    <div id="select-players">
+        <table>
+            {% for instrument in gig.required_instruments.all %}
 
-            {% get_player_assigned_to_instrument gig.id instrument.id as current_player %}
-            <tr>
-                <th>{{ instrument }} {{ instrument.icon }}</th>
-                <td>
-                    <select id="{{ instrument.id }}">
-                        <option value="-1" {% if current_player == -1 %}selected{% endif %}>Choose player...</option>
-                        {% for player in instrument.player_set.all %}
-                            <option value="{{ player.id }}" {% if current_player == player.id %}selected{% endif %}>{{ player }} - {% get_player_availability player.id gig.id %}</option>
-                        {% endfor %}
-                    </select>
-                </td>
-            </tr>
-        {% endfor %}
-    </table>
+                {% get_player_assigned_to_instrument gig.id instrument.id as current_player %}
+                <tr>
+                    <th>{{ instrument }} {{ instrument.icon }}</th>
+                    <td>
+                        <select id="{{ instrument.id }}">
+                            <option value="-1" {% if current_player == -1 %}selected{% endif %}>Choose player...</option>
+                            {% for player in instrument.player_set.all %}
+                                <option value="{{ player.id }}" {% if current_player == player.id %}selected{% endif %}>{{ player }} - {% get_player_availability player.id gig.id %}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div id="view-players">
+        {% get_players_on_gig gig.id as players_on_gig %} 
+        {% get_unassigned_instruments gig.id as unassigned_instruments %}
+        <div class="player-container">
+            {% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}}{{pag.player}}</span>{%endfor%}
+            {% for instrument in unassigned_instruments %}<span class="player-with-instrument unassigned">⚠️{{ instrument }}</span>{% endfor %}
+        </div>
+        <button id="unlock-player-changes">Make changes to lineup</button>
+    </div>
 
 {% endblock content %}
