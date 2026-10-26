@@ -139,7 +139,7 @@ def gigs(request):
         context['calendar_url'] = webcal_url
         context['google_calendar_url'] = 'https://calendar.google.com/calendar/r?cid=' + quote(webcal_url, safe='')
         context['outlook_calendar_url'] = 'https://outlook.live.com/calendar/0/addfromweb?url=' + quote(feed_url, safe='') \
-            + '&name=' + quote(f'Gigs - {user.name}', safe='')
+            + '&name=' + quote(f'NM Gigs - {user.name}', safe='')
 
     return render(request, "gigs.html", context)
 
@@ -179,7 +179,7 @@ def player_calendar(request, player_id):
         'PRODID:-//gigger//gigs//EN',
         'CALSCALE:GREGORIAN',
         'METHOD:PUBLISH',
-        f'X-WR-CALNAME:{_ical_escape(f"Gigs - {player.name}")}',
+        f'X-WR-CALNAME:{_ical_escape(f"NM Gigs - {player.name}")}',
         'REFRESH-INTERVAL;VALUE=DURATION:PT6H',
         'X-PUBLISHED-TTL:PT6H',
     ]
@@ -190,13 +190,18 @@ def player_calendar(request, player_id):
             f'DTSTAMP:{now}',
             f'DTSTART;VALUE=DATE:{gig.date.strftime("%Y%m%d")}',
             f'DTEND;VALUE=DATE:{(gig.date + datetime.timedelta(days=1)).strftime("%Y%m%d")}',
-            f'SUMMARY:{_ical_escape(gig.title)}',
+            f'SUMMARY:{_ical_escape(f"NM Gig - {gig.title}")}',
             f'URL:{request.build_absolute_uri(reverse("view_gig", args=[gig.id]))}',
         ]
         if gig.location:
             lines.append(f'LOCATION:{_ical_escape(gig.location)}')
+        description = []
+        if gig.start_time:
+            description.append(f'Dancing starts at {gig.start_time.strftime("%H:%M")}')
         if gig.details:
-            lines.append(f'DESCRIPTION:{_ical_escape(gig.details)}')
+            description.append(gig.details)
+        if description:
+            lines.append('DESCRIPTION:' + _ical_escape('\n'.join(description)))
         lines.append('END:VEVENT')
     lines.append('END:VCALENDAR')
 
