@@ -207,3 +207,22 @@ def my_missing_availability(request):
         'gigs': gigs,
         'availability_choices': AvailabilityResponse.Availability.choices,
     })
+
+
+def manage_players(request):
+    players = Player.objects.all().order_by('name')
+
+    if request.method == "POST":
+        if 'new_player_name' in request.POST:
+            name = request.POST['new_player_name'].strip()
+            if name:
+                Player.objects.create(name=name)
+        else:
+            for player in players:
+                player.can_play.set(request.POST.getlist(f'can_play_{player.id}'))
+        return redirect(reverse('manage_players'))
+
+    return render(request, "manage_players.html", {
+        'players': players,
+        'instruments': Instrument.objects.all(),
+    })

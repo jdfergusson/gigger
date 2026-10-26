@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load giggertags %}
+
+{% block title %}Manage players{% endblock title %}
+
+{% block css %}
+    table {
+        border-collapse: collapse;
+    }
+
+    tr {
+        border: 1px solid black;
+    }
+
+    /* Keep the instrument headings visible while scrolling down the players */
+    th {
+        position: sticky;
+        top: 0;
+        background-color: white;
+    }
+
+    td:first-child {
+        text-align: left;
+    }
+{% endblock css %}
+
+{% block content %}
+    <h1>Players</h1>
+
+    <form method="post">
+        {% csrf_token %}
+        <table>
+            <tr>
+                <th></th>
+                {% for instrument in instruments %}
+                    <th title="{{ instrument }}">{{ instrument.icon }}</th>
+                {% endfor %}
+            </tr>
+            {% for player in players %}
+                <tr>
+                    <td>{{ player }}</td>
+                    {% for instrument in instruments %}
+                        <td>
+                            <input type="checkbox" name="can_play_{{ player.id }}" value="{{ instrument.id }}"
+                                title="{{ instrument }}" {% if instrument in player.can_play.all %}checked{% endif %}>
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+        <p><input type="submit" value="Save instruments"></p>
+    </form>
+
+    <h2>Add a player</h2>
+    <form method="post">
+        {% csrf_token %}
+        <p>
+            <input type="text" name="new_player_name" placeholder="Name" required>
+            <input type="submit" value="Add">
+        </p>
+    </form>
+{% endblock content %}

@@ -13,6 +13,7 @@ urlpatterns = [
     re_path('^gig/(?P<gig_id>[0-9]+)/availability/(?P<player_id>[0-9]+)/set/?$', views.availability_set, name='availability_set'),
     re_path('^me/gigs$', views.my_gigs, name='my_gigs'),
     re_path('^me/availability$', views.my_missing_availability, name='my_missing_availability'),
+    re_path('^players$', views.manage_players, name='manage_players'),
     re_path('^whoami$', views.who_am_i, name='who_am_i'),
     re_path('^iam/(?P<player_id>[0-9]+)$', views.i_am, name='i_am'),
 ]
