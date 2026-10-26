@@ -30,7 +30,13 @@ class Gig(models.Model):
         CONFIRMED = 'CO', 'Confirmed'
         CANCELLED = 'CA', 'Cancelled'
         DONE = 'DO', 'Done'
-        
+
+    class ContactMethod(models.TextChoices):
+        EMAIL = 'EM', 'Email'
+        FACEBOOK = 'FB', 'Facebook'
+        IN_PERSON = 'IP', 'In person'
+        OTHER = 'OT', 'Other'
+
     created = models.DateField(auto_now_add=True)
     modified = models.DateField(auto_now=True)
     
@@ -40,6 +46,7 @@ class Gig(models.Model):
     location = models.CharField(max_length=200, blank=True)
     contact_name = models.CharField(max_length=200, blank=True)
     contact_email = models.CharField(max_length=200, blank=True)
+    contact_method = models.CharField(max_length=2, choices=ContactMethod.choices, default=ContactMethod.OTHER)
     handled_by = models.ForeignKey(Player, null=True, blank=True, on_delete=models.SET_NULL, verbose_name="Band contact")
     start_time = models.TimeField(blank=True, null=True, verbose_name="Dancing start time")
     details = models.TextField(blank=True)

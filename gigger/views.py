@@ -35,7 +35,7 @@ class EditGigForm(forms.ModelForm):
             'date': forms.DateInput(attrs={'type': 'date'}),
             'start_time': forms.TimeInput(format='%H:%M', attrs={'type': 'time'}),
         }
-        fields = ["status", "date", "title", "location", "contact_name", "contact_email", 
+        fields = ["status", "date", "title", "location", "contact_name", "contact_email", "contact_method",
                   "handled_by", "start_time", "details", 
                   "paid", "cost_per_player", "number_of_charging_players", "cost_per_car", 
                   "number_of_cars", "cost_extras",  "required_instruments"]

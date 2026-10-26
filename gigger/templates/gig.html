@@ -58,7 +58,7 @@
     <h2>On {{ gig.date }} at {{ gig.location }}</h2>
 
     {% if gig.start_time %}<p>Dancing starts at {{ gig.start_time }}</p> {% endif %}
-    <p>Contact: {{ gig.contact_name }} - {{ gig.contact_email }}. {% if gig.handled_by %} Handled by {{ gig.handled_by }}{% endif %}</p>
+    <p>Contact (via {{ gig.get_contact_method_display|lower }}): {{ gig.contact_name }} - {{ gig.contact_email }}. {% if gig.handled_by %} Handled by {{ gig.handled_by }}{% endif %}</p>
     <p>Details: {{ gig.details }}</p>
     <p>Total cost: £{{ gig.total_cost }} (£{{ gig.cost_per_player }} × {{ gig.number_of_charging_players }} people + £{{ gig.cost_per_car }} × {{ gig.number_of_cars }} cars + £{{ gig.cost_extras }})
 
