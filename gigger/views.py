@@ -184,13 +184,16 @@ def player_calendar(request, player_id):
         'X-PUBLISHED-TTL:PT6H',
     ]
     for gig in gigs:
+        instruments = ', '.join(
+            pag.instrument.name for pag in PlayingAtGig.objects.filter(gig=gig, player=player).order_by('instrument')
+        )
         lines += [
             'BEGIN:VEVENT',
             f'UID:gig-{gig.id}@{request.get_host()}',
             f'DTSTAMP:{now}',
             f'DTSTART;VALUE=DATE:{gig.date.strftime("%Y%m%d")}',
             f'DTEND;VALUE=DATE:{(gig.date + datetime.timedelta(days=1)).strftime("%Y%m%d")}',
-            f'SUMMARY:{_ical_escape(f"NM Gig - {gig.title}")}',
+            f'SUMMARY:{_ical_escape(f"NM Gig - {gig.title} - {instruments}")}',
             f'URL:{request.build_absolute_uri(reverse("view_gig", args=[gig.id]))}',
         ]
         if gig.location:
