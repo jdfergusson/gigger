@@ -70,7 +70,7 @@
 
     <p>
         {% for a in availability %}
-        {{ a.player }}: {{ a }} {% if a.notes %}({{ a.notes }}){% endif %}<br>
+        {{ a.get_availability_icon }} {{ a.player }}: {{ a }} {% if a.notes %}({{ a.notes }}){% endif %}<br>
         {% endfor %}
     </p>
 

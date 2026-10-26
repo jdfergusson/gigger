@@ -97,6 +97,14 @@ class AvailabilityResponse(models.Model):
     class Meta:
         unique_together = ('gig', 'player')
 
+    def get_availability_icon(self):
+        icons = {
+            'AV': '🟩',
+            'IF': '🟨',
+            'UN': '🟥',
+        }
+        return icons.get(self.availability, "?")
+
     def __str__(self):
         return self.Availability(self.availability).label
     

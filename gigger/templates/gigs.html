@@ -29,10 +29,46 @@
         flex-flow: row wrap;
         justify-content: center;
     }
+
+    .gig-card {
+        border: 1px solid black;
+        border-radius: 0.5em;
+        padding: 0.8em;
+        margin-bottom: 0.8em;
+        text-align: center;
+    }
+
+    /* base.html pads every div on mobile; spacing in the card comes from margins instead */
+    .gig-card div {
+        padding-top: 0;
+    }
+
+    .gig-card-date {
+        font-weight: bold;
+    }
+
+    .gig-card-title {
+        font-size: 1.3em;
+        font-weight: bold;
+        margin: 0.2em 0 0.5em 0;
+    }
+
+    .gig-card-when-where, .gig-card-details {
+        margin: 0 0 0.5em 0;
+    }
+
+    .gig-card-details {
+        color: #555555;
+    }
 {% endblock css %}
 
 {% block mobilecss %}
     .t-notes, .t-price {
+        display: none;
+    }
+
+    /* The cards replace the upcoming gigs table on mobile */
+    table.upcoming-gigs {
         display: none;
     }
 {% endblock mobilecss %}
@@ -51,6 +87,7 @@
             <li><a href="{% url 'my_gigs' %}">View gigs you're playing for</a></li>
             <li><a href="{% url 'my_missing_availability' %}">View gigs you haven't given your availability for</a></li>
         </ul>
+        <a href="{% url 'who_am_i' %}">Not you?</a>
     {% else %}
         <h3>Hello!</h3>
         <a href="{% url 'who_am_i' %}">Who are you?</a>
@@ -60,7 +97,30 @@
 
     <h3>All upcoming gigs - <a href="{% url 'create_gig' %}">Propose a gig</a></h3>
 
-    <table>
+    <div class="gig-cards mob-only">
+        {% for gig in incomplete_gigs %}
+            <div class="gig-card">
+                <div class="gig-card-date">{{ gig.date | date:"l d/m/Y" }}</div>
+                <div class="gig-card-title">{{ gig.get_status_icon }} <a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a></div>
+                {% if gig.start_time or gig.location %}
+                    <p class="gig-card-when-where">
+                        {% if gig.start_time %}{{ gig.start_time }} dancing start{% endif %}
+                        {% if gig.start_time and gig.location %}·{% endif %}
+                        {{ gig.location }}
+                    </p>
+                {% endif %}
+                {% if gig.details %}<p class="gig-card-details">{{ gig.details }}</p>{% endif %}
+                {% get_players_on_gig gig.id as players_on_gig %}
+                {% get_unassigned_instruments gig.id as unassigned_instruments %}
+                <div class="player-container">
+                    {% for pag in players_on_gig %}<span class="player-with-instrument">{{pag.instrument.icon}}{{pag.player}}</span>{%endfor%}
+                    {% for instrument in unassigned_instruments %}<span class="player-with-instrument unassigned">⚠️{{ instrument }}</span>{% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <table class="upcoming-gigs">
         <tr>
             <th class="t-date">When</th>
             <th class="t-deets">Details</th>

@@ -3,6 +3,27 @@
 
 {% block title %}Gigs{% endblock title %}}
 
+{% block js %}
+$(function() {
+    $('.availability-buttons button').click(function() {
+        var button = $(this);
+        var container = button.closest('.availability-buttons');
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: container.data('url'),
+            data: {
+                availability: button.data('availability'),
+                notes: ''
+            },
+            success: function() {
+                container.find('button').prop('disabled', true);
+                button.addClass('chosen').text('✔️ ' + button.text());
+            },
+        });
+    });
+})
+{% endblock js %}
 
 {% block css %}
 
@@ -42,6 +63,25 @@
         font-style: normal;
     }
 
+    .missing-availability td {
+        padding: 0.6em 0.5em;
+    }
+
+    .missing-availability button {
+        width: 100%;
+        padding: 0.5em 0.8em;
+        white-space: nowrap;
+    }
+
+    .missing-availability button.chosen {
+        font-weight: bold;
+    }
+
+    .gig-date {
+        font-size: 0.85em;
+        color: #555555;
+    }
+
     .player-container {
         display: flex;
         flex-flow: row wrap;
@@ -53,6 +93,33 @@
     .t-notes, .t-price {
         display: none;
     }
+
+    /* Stack gig details above the buttons. Selectors are more specific than
+       the css block's so they win despite coming earlier in the page. */
+    table.missing-availability, table.missing-availability tbody {
+        display: block;
+        width: 100%;
+    }
+
+    table.missing-availability tr {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.4em;
+        padding: 0.6em 0.4em;
+    }
+
+    table.missing-availability td {
+        padding: 0;
+    }
+
+    table.missing-availability td:first-child {
+        grid-column: 1 / -1;
+    }
+
+    table.missing-availability button {
+        white-space: normal;
+        min-height: 2.5em;
+    }
 {% endblock mobilecss %}
 
 {% block content %}
@@ -63,10 +130,16 @@
 
     
 
-    <ul>
+    <table class="missing-availability">
         {% for gig in gigs %}
-            <li>{{ gig.get_status_icon }}<a href="{% url 'view_gig' gig.id %}">{{ gig.title }}, {{ gig.date | date:"l d/m/Y" }}</li>
+            <tr class="availability-buttons" data-url="{% url 'availability_set' gig.id user.id %}">
+                <td>{{ gig.get_status_icon }} <a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a><br>
+                    <span class="gig-date">{{ gig.date | date:"l d/m/Y" }}</span></td>
+                {% for ar in availability_choices %}
+                    <td><button type="button" data-availability="{{ ar.0 }}">{{ ar.1 }}</button></td>
+                {% endfor %}
+            </tr>
         {% endfor %}
-    </ul>
+    </table>
 
 {% endblock content %}

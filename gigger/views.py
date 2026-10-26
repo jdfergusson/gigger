@@ -202,4 +202,8 @@ def my_missing_availability(request):
         availabilityresponse__player=user
     ).order_by('date')
 
-    return render(request, "my_missing_availability.html", {'user': user, 'gigs': gigs})
+    return render(request, "my_missing_availability.html", {
+        'user': user,
+        'gigs': gigs,
+        'availability_choices': AvailabilityResponse.Availability.choices,
+    })
