@@ -19,6 +19,7 @@ class Instrument(models.Model):
 class Player(models.Model):
     name = models.CharField(max_length=100, null=False, blank=False)
     can_play = models.ManyToManyField(Instrument)
+    is_admin = models.BooleanField(default=False, verbose_name="Administrator")
 
     def __str__(self):
         return self.name

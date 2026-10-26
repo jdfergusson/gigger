@@ -3,60 +3,80 @@
 
 {% block title %}Manage players{% endblock title %}
 
+{% block js %}
+$(function() {
+    $('.player input[type=checkbox]').on('change', function() {
+        var player = $(this).closest('.player');
+        var checked = player.find('input[type=checkbox]:checked');
+        $.ajax({
+            type: 'POST',
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: '{% url "manage_players" %}',
+            traditional: true,
+            data: {
+                player_id: player.data('player-id'),
+                can_play: checked.map(function() { return this.value; }).get()
+            },
+            success: function() {
+                player.find('.player-icons').text(
+                    checked.map(function() { return $(this).data('icon'); }).get().join('')
+                );
+            }
+        });
+    });
+})
+{% endblock js %}
+
 {% block css %}
-    table {
-        border-collapse: collapse;
+    .player {
+        border-bottom: 1px solid #aaaaaa;
+        padding: 0.6em 0;
     }
 
-    tr {
-        border: 1px solid black;
+    .player summary {
+        cursor: pointer;
+        font-size: 1.2em;
     }
 
-    /* Keep the instrument headings visible while scrolling down the players */
-    th {
-        position: sticky;
-        top: 0;
-        background-color: white;
+    .player-instruments {
+        padding: 0.5em 0 0 1.5em;
     }
 
-    td:first-child {
-        text-align: left;
+    .add-player {
+        margin-top: 2.5em;
+    }
+
+    .player label {
+        display: block;
+        padding: 0.3em 0;
     }
 {% endblock css %}
 
 {% block content %}
     <h1>Players</h1>
+    <p><a href="{% url 'home' %}">Back</a></p>
 
-    <form method="post">
-        {% csrf_token %}
-        <table>
-            <tr>
-                <th></th>
+    {% for player in players %}
+        <details class="player" data-player-id="{{ player.id }}">
+            <summary>{{ player }} <span class="player-icons">{% for instrument in player.can_play.all %}{{ instrument.icon }}{% endfor %}</span></summary>
+            <div class="player-instruments">
                 {% for instrument in instruments %}
-                    <th title="{{ instrument }}">{{ instrument.icon }}</th>
+                    <label>
+                        <input type="checkbox" value="{{ instrument.id }}" data-icon="{{ instrument.icon }}"
+                            {% if instrument in player.can_play.all %}checked{% endif %}>
+                        {{ instrument.icon }} {{ instrument }}
+                    </label>
                 {% endfor %}
-            </tr>
-            {% for player in players %}
-                <tr>
-                    <td>{{ player }}</td>
-                    {% for instrument in instruments %}
-                        <td>
-                            <input type="checkbox" name="can_play_{{ player.id }}" value="{{ instrument.id }}"
-                                title="{{ instrument }}" {% if instrument in player.can_play.all %}checked{% endif %}>
-                        </td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </table>
-        <p><input type="submit" value="Save instruments"></p>
-    </form>
+            </div>
+        </details>
+    {% endfor %}
 
-    <h2>Add a player</h2>
-    <form method="post">
-        {% csrf_token %}
-        <p>
+    <div class="add-player">
+        <h2>Add a player</h2>
+        <form method="post">
+            {% csrf_token %}
             <input type="text" name="new_player_name" placeholder="Name" required>
             <input type="submit" value="Add">
-        </p>
-    </form>
+        </form>
+    </div>
 {% endblock content %}

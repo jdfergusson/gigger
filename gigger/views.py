@@ -210,19 +210,19 @@ def my_missing_availability(request):
 
 
 def manage_players(request):
-    players = Player.objects.all().order_by('name')
-
     if request.method == "POST":
         if 'new_player_name' in request.POST:
             name = request.POST['new_player_name'].strip()
             if name:
                 Player.objects.create(name=name)
-        else:
-            for player in players:
-                player.can_play.set(request.POST.getlist(f'can_play_{player.id}'))
-        return redirect(reverse('manage_players'))
+            return redirect(reverse('manage_players'))
+
+        # Instrument changes are saved via ajax as each checkbox changes
+        player = get_object_or_404(Player, id=request.POST['player_id'])
+        player.can_play.set(request.POST.getlist('can_play'))
+        return JsonResponse({'success': True})
 
     return render(request, "manage_players.html", {
-        'players': players,
+        'players': Player.objects.all().order_by('name'),
         'instruments': Instrument.objects.all(),
     })
