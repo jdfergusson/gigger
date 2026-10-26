@@ -14,6 +14,7 @@ urlpatterns = [
     re_path('^me/gigs$', views.my_gigs, name='my_gigs'),
     re_path('^me/availability$', views.my_missing_availability, name='my_missing_availability'),
     re_path('^players$', views.manage_players, name='manage_players'),
+    re_path('^players/(?P<player_id>[0-9]+)/calendar.ics$', views.player_calendar, name='player_calendar'),
     re_path('^whoami$', views.who_am_i, name='who_am_i'),
     re_path('^iam/(?P<player_id>[0-9]+)$', views.i_am, name='i_am'),
 ]

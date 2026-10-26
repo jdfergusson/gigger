@@ -86,6 +86,7 @@
         <ul>
             <li><a href="{% url 'my_gigs' %}">View gigs you're playing for</a></li>
             <li><a href="{% url 'my_missing_availability' %}">View gigs you haven't given your availability for</a></li>
+            <li>Add your gigs to your calendar: <a href="{{ google_calendar_url }}" target="_blank">Google Calendar</a> | <a href="{{ outlook_calendar_url }}" target="_blank">Outlook</a> |<a href="{{ calendar_url }}">Other calendar apps</a></li>
             {% if user.is_admin %}
                 <li><a href="{% url 'manage_players' %}">Edit players</a></li>
             {% endif %}
