@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+{% load giggertags %}
+
+{% block title %}Dances and tunes{% endblock title %}
+
+{% block css %}
+    .table-scroll {
+        overflow-x: auto;
+        margin-bottom: 2em;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+    th, td {
+        text-align: left;
+        vertical-align: top;
+        padding: 0.5em 0.7em;
+        border: 1px solid #999999;
+    }
+
+    th {
+        background-color: #dddddd;
+    }
+
+    tbody tr:nth-child(even) td {
+        background-color: #f4f4f4;
+    }
+
+    .dances td:first-child {
+        font-weight: bold;
+    }
+
+    .tune-list {
+        border-bottom: 1px solid #aaaaaa;
+        padding: 0.6em 0;
+    }
+
+    .tune-list summary {
+        cursor: pointer;
+        font-size: 1.2em;
+    }
+
+    .tune-list ul {
+        margin: 0.5em 0 0 0;
+    }
+
+    /* Separate the group of dances without suggested tunes */
+    tbody + tbody tr:first-child td {
+        border-top: 3px solid #666666;
+    }
+{% endblock css %}
+
+{% block content %}
+    <h1>Dances and tunes</h1>
+    <p><a href="{% url 'home' %}">Back</a></p>
+
+    <div class="table-scroll">
+        <table class="dances">
+            <thead>
+                <tr>
+                    <th>Dance</th>
+                    <th>Tune category</th>
+                    <th>Suggested tune from book</th>
+                    <th>Number of beats/bars for dance cycle</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Flying Scotsman</td><td>We do a fast reel (traditionally it’s a jig)</td><td>Maggie’s</td><td>32 bars of 2 beats per bar – Maggie’s is written in 4/4 but played in 2/2 really</td></tr>
+                <tr><td>Dashing White Sergeant</td><td>32-bar Reel</td><td>Jacky Tar</td><td>32 bars of 2 beats per bar – Jacky Tar is written in 4/4 but played in 2/2 really</td></tr>
+                <tr><td>Military Two Step</td><td>32-bar Jig (well, technically a 6/8 march!)</td><td>Macnamara’s</td><td>16 bars of 2 beats per bar</td></tr>
+                <tr><td>St. Bernard’s waltz</td><td>Waltzes</td><td>Waltz set – Ae Fond Kiss etc.</td><td>16 bars of 3 beats per bar</td></tr>
+                <tr><td>Gay Gordons</td><td>2/4 March</td><td>The Barren Rocks of Aden etc.</td><td>16 bars of 2 beats per bar</td></tr>
+                <tr><td>Canadian Barn Dance</td><td>4/4 March</td><td>Canadian Barn Dance</td><td>8 bars of 4 beats per bar</td></tr>
+                <tr><td>Lucky Seven</td><td>32-bar Reel</td><td>Double Flats</td><td>32 bars of 2 beats per bar, nb. assumes Double Flats is in 2/2</td></tr>
+                <tr><td>(Orcadian) Strip The Willow</td><td>32-bar Jig</td><td>Cat that ate the candle</td><td>N/A</td></tr>
+                <tr><td>Circassian Circle</td><td>32-bar Reel</td><td>Circassian Circle Set</td><td>32 bars of 2 beats (music is notated in 2/2)</td></tr>
+                <tr><td>Riverside Jig</td><td>32-bar jig</td><td>Irish Jig Set</td><td>32 bars of 2 beats</td></tr>
+                <tr><td>Bridge of Athlone</td><td>48-bar jig</td><td>If that confuses you…</td><td>48 bars of 2 beats</td></tr>
+                <tr><td>Quarnden Hill</td><td>32-bar jig (normally a 48 bar jig but Eliza has condensed it)</td><td>Hobbits</td><td>32 bars of 2 beats</td></tr>
+                <tr><td>Virginia Reel</td><td>48-bar reel</td><td>More cheese, please</td><td>48 bars of 2</td></tr>
+            </tbody>
+            <tbody>
+                <tr><td>Cumberland square eight</td><td>32-bar reel</td><td></td><td>64 bars of 2 beats</td></tr>
+                <tr><td>Dunnet Head</td><td>32-bar reel or hornpipe</td><td></td><td>32 bars of 2 beats</td></tr>
+                <tr><td>Ninepins</td><td>32-bar jig or reel</td><td></td><td>32 bars of 2 beats</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>Tunes by type</h2>
+    <details class="tune-list">
+        <summary>32-bar Jigs</summary>
+        <ul>
+            <li>Cat that ate the candle</li>
+            <li>Irish Jig Set</li>
+            <li>Hobbits</li>
+        </ul>
+    </details>
+    <details class="tune-list">
+        <summary>32-bar reels</summary>
+        <ul>
+            <li>Maggie’s</li>
+            <li>Jacky Tar</li>
+            <li>Double Flats</li>
+            <li>Circassian Circle Set</li>
+            <li>Oh Reely</li>
+            <li>De’il among the Tailors</li>
+            <li>Willafjord</li>
+            <li>Tuck yourself in</li>
+        </ul>
+    </details>
+    <details class="tune-list">
+        <summary>Marches</summary>
+        <ul>
+            <li>Macnamara’s</li>
+            <li>The Barren Rocks of Aden etc.</li>
+            <li>Canadian Barn Dance</li>
+        </ul>
+    </details>
+    <details class="tune-list">
+        <summary>Others</summary>
+        <ul>
+            <li>Ae Fond Kiss etc. - Waltzes</li>
+            <li>If that confuses you… - 48 bar jig</li>
+            <li>More cheese, please - 48-bar reel</li>
+        </ul>
+    </details>
+{% endblock content %}

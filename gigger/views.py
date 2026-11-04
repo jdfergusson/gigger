@@ -163,6 +163,10 @@ def _ical_fold(line):
     return '\r\n '.join(parts)
 
 
+def dances(request):
+    return render(request, "dances.html")
+
+
 def player_calendar(request, player_id):
     player = get_object_or_404(Player, id=player_id)
     gigs = Gig.objects.filter(
