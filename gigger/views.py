@@ -40,8 +40,12 @@ class EditGigForm(forms.ModelForm):
         }
         fields = ["status", "date", "title", "location", "contact_name", "contact_email", "contact_method",
                   "handled_by", "start_time", "details", 
-                  "paid", "cost_per_player", "number_of_charging_players", "cost_per_car", 
+                  "paid", "cost_per_player", "permit_custom_fee", "cost_per_car",
                   "number_of_cars", "cost_extras",  "required_instruments"]
+        labels = {
+            'cost_per_player': 'Default cost per player',
+            'permit_custom_fee': 'Allow custom fee',
+        }
     
 
 def _get_user_or_none(request):
@@ -95,6 +99,46 @@ def view_gig(request, gig_id):
         "availability": availability,
         "user": user,    
     })
+
+
+def _get_custom_fee(gig, player):
+    return CustomFee.objects.filter(gig=gig, player=player).first() or CustomFee(gig=gig, player=player)
+
+
+def _save_custom_fee(gig, player, data):
+    """Save a fee choice: data['choice'] is 'default' or 'custom', with an optional data['custom_fee']"""
+    defaults = {'wants_standard_fee': data.get('choice') != 'custom'}
+    if data.get('custom_fee'):
+        # Keep the previous custom fee when switching to the default, so it comes back if they switch again
+        defaults['custom_fee'] = int(data['custom_fee'])
+    CustomFee.objects.update_or_create(gig=gig, player=player, defaults=defaults)
+
+
+def custom_fee_entry_point(request, gig_id):
+    gig = get_object_or_404(Gig, id=gig_id)
+    user = _get_user_or_none(request)
+
+    # Skip the "who are you?" step if we already know, unless they asked to change
+    if user is not None and 'choose' not in request.GET:
+        return redirect(reverse('custom_fee', args=[gig.id, user.id]))
+
+    return render(request, "custom_fee_entry_point.html", {
+        "gig": gig,
+        "players": Player.objects.all().order_by('name'),
+    })
+
+
+def custom_fee(request, gig_id, player_id):
+    gig = get_object_or_404(Gig, id=gig_id)
+    player = get_object_or_404(Player, id=player_id)
+
+    if request.method == "POST":
+        # Each change is saved via ajax as soon as it is made
+        _save_custom_fee(gig, player, request.POST)
+        return JsonResponse({'success': True})
+
+    request.session['uid'] = player.id
+    return render(request, "custom_fee.html", {"gig": gig, "player": player, "fee": _get_custom_fee(gig, player)})
 
 
 def assign_player(request, gig_id):
@@ -222,10 +266,14 @@ def availability_entry_point(request, gig_id):
 
 
 def availability_form(request, gig_id, player_id):
+    gig = get_object_or_404(Gig, id=gig_id)
+    player = get_object_or_404(Player, id=player_id)
     context = {
-        'gig': get_object_or_404(Gig, id=gig_id),
-        'player': get_object_or_404(Player, id=player_id),
+        'gig': gig,
+        'player': player,
         'availability_choices': AvailabilityResponse.Availability.choices,
+        'fee': _get_custom_fee(gig, player),
+        'response': AvailabilityResponse.objects.filter(gig=gig, player=player).first(),
     }
     request.session['uid'] = player_id
     return render(request, "availability_choice.html", context)
@@ -234,16 +282,22 @@ def availability_form(request, gig_id, player_id):
 def availability_set(request, gig_id, player_id):
     gig = get_object_or_404(Gig, id=gig_id)
     player = get_object_or_404(Player, id=player_id)
-    print(request.POST)
-    ar, created = AvailabilityResponse.objects.update_or_create(
-        gig=gig, 
-        player=player, 
-        defaults={
-            'availability': request.POST['availability'],
-            'notes': request.POST['notes']
-        }
-    )
-    ar.save()
+    if request.POST.get('availability'):
+        AvailabilityResponse.objects.update_or_create(
+            gig=gig,
+            player=player,
+            defaults={
+                'availability': request.POST['availability'],
+                'notes': request.POST.get('notes', ''),
+            }
+        )
+    elif 'notes' in request.POST:
+        # Notes alone only update an existing answer; with no answer yet the page
+        # sends them along once an availability is chosen
+        AvailabilityResponse.objects.filter(gig=gig, player=player).update(notes=request.POST['notes'])
+
+    if gig.permit_custom_fee and 'choice' in request.POST:
+        _save_custom_fee(gig, player, request.POST)
     return JsonResponse({'redirect': reverse('view_gig', args=[gig.id])})
 
 
@@ -274,6 +328,18 @@ def my_gigs(request):
     my_gigs = Gig.objects.filter(playingatgig__player=user, status__in=[Gig.Status.CONFIRMED, Gig.Status.PROPOSED]).distinct().order_by('date')
     
     return render(request, "my_gigs.html", {'user': user, 'gigs': my_gigs})
+
+
+def my_history(request):
+    user = _get_user_or_none(request)
+
+    if user is None:
+        return redirect(reverse('who_am_i'))
+
+    gigs = Gig.objects.filter(playingatgig__player=user, status=Gig.Status.DONE).distinct().order_by('-date')
+    history = [(gig, gig.fee_for(user)) for gig in gigs]
+
+    return render(request, "my_history.html", {'user': user, 'history': history})
 
 
 def my_missing_availability(request):

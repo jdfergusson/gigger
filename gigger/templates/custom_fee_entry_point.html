@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Fee for {{ gig.title }}{% endblock title %}
+
+{% block content %}
+
+<h3>Fee for {{ gig.title }} on {{ gig.date }}</h3>
+<h1>Who are you?</h1>
+{% for player in players %}
+    <span class="player-name"><a href="{% url 'custom_fee' gig.id player.id %}">{{ player }}</a></span>
+{% endfor %}
+
+{% endblock content %}

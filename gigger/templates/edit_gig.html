@@ -12,7 +12,7 @@
     </table>
     <div class="side-by-side-container">
         <input type="submit" value="Save changes" class="side-by-side-element btn-good">
-        <button onclick="window.location.href='{% url 'view_gig' gig.id %}';" class="btn-bad side-by-side-element">Cancel</button>
+        <button type="button" onclick="window.location.href='{% url 'view_gig' gig.id %}';" class="btn-bad side-by-side-element">Cancel</button>
     </div>
 </form>
 {% endblock content %}

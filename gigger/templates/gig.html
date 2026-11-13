@@ -17,7 +17,12 @@
                     player_id: player_id
                 },
                 success: function(data) {
-                    console.log(data);
+                    // Re-fetch the cost section so the total reflects the new lineup,
+                    // keeping the breakdown open if it was open
+                    var wasOpen = $('#cost-section .cost-breakdown').prop('open');
+                    $('#cost-section').load(window.location.href + ' #cost-section > *', function() {
+                        $('#cost-section .cost-breakdown').prop('open', wasOpen);
+                    });
                 }
             });
         });
@@ -33,6 +38,17 @@
 
         });
 
+        // Delegated, as the cost section containing this button gets reloaded
+        $(document).on('click', '#fee-link', function(event) {
+            event.preventDefault();
+            $("#fee-link-copied").removeClass("hidden");
+            setTimeout(function() {
+                $("#fee-link-copied").addClass("hidden");
+            }, 3000);
+            {% url "custom_fee_entry_point" gig.id as fee_relative_url %}
+            copyToClipboard('{% absolute_url fee_relative_url %}');
+        });
+
         $("#select-players").hide();
 
         $("#unlock-player-changes").click(function(event) {
@@ -45,7 +61,110 @@
 
 {% block css %}
 
-    #availability-link {
+    .gig-section {
+        margin: 1.5em 0;
+    }
+
+    .gig-section h2 {
+        display: block;
+        margin: 0 0 0.5em 0;
+        padding-bottom: 0.2em;
+        border-bottom: 1px solid #aaaaaa;
+    }
+
+    .gig-facts th {
+        text-align: left;
+        vertical-align: top;
+        padding: 0.2em 1em 0.2em 0;
+    }
+
+    .gig-facts td {
+        text-align: left;
+        padding: 0.2em 0;
+    }
+
+    .cost-breakdown {
+        margin: 0.5em 0;
+    }
+
+    .cost-breakdown summary {
+        cursor: pointer;
+    }
+
+    .cost-breakdown table {
+        margin: 0.4em 0 0 1em;
+    }
+
+    .cost-breakdown td {
+        text-align: left;
+        padding: 0.15em 1em 0.15em 0;
+    }
+
+    .cost-breakdown td:last-child {
+        text-align: right;
+    }
+
+    /* One grid for the whole list, with each card using it via subgrid, so the
+       name, fee and notes line up in the same columns on every card */
+    .availability-cards {
+        display: grid;
+        grid-template-columns: max-content max-content 1fr;
+        row-gap: 4px;
+        max-width: 30em;
+        margin: 0.5em 0 1em 0;
+    }
+
+    .availability-card {
+        display: grid;
+        grid-column: 1 / -1;
+        grid-template-columns: subgrid;
+        align-items: baseline;
+        column-gap: 0.8em;
+        padding: 0.3em 0.7em;
+        border-radius: 6px;
+        border: 1px solid transparent;
+        /* A fixed line height (in the card's em, inherited as a length) keeps every row
+           the same height whether or not it has the smaller fee/notes text */
+        line-height: 1.5em;
+    }
+
+    /* Stop the site-wide mobile div padding from spreading the card out */
+    .availability-cards, .availability-card div {
+        padding: 0;
+    }
+
+    .availability-name {
+        font-weight: bold;
+    }
+
+    .availability-extra {
+        font-size: 0.8em;
+    }
+
+    .availability-fee {
+        grid-column: 2;
+    }
+
+    .availability-notes {
+        grid-column: 3;
+    }
+
+    .availability-AV {
+        background-color: #c8f0c6;
+        border-color: #7fc47b;
+    }
+
+    .availability-IF {
+        background-color: #fbeeb8;
+        border-color: #e0c55a;
+    }
+
+    .availability-UN {
+        background-color: #f6cdd2;
+        border-color: #d88893;
+    }
+
+    #availability-link, #fee-link {
         padding: 10px;
         margin-left: 10px;
         margin-right: 10px;
@@ -53,44 +172,83 @@
 {% endblock css %}
 
 {% block content %}
-    <h1>{{ gig.title }} - {{ gig.get_status }} {{ gig.get_status_icon }}</h1>
-    <p><a href="{% url 'edit_gig' gig.id %}">Edit details</a> | <a href="{% url 'gigs' %}">Back</a></p>
-    <h2>On {{ gig.date }} at {{ gig.location }}</h2>
-
-    {% if gig.start_time %}<p>Dancing starts at {{ gig.start_time }}</p> {% endif %}
-    <p>Contact (via {{ gig.get_contact_method_display|lower }}): {{ gig.contact_name }} - {{ gig.contact_email }}. {% if gig.handled_by %} Handled by {{ gig.handled_by }}{% endif %}</p>
-    <p>Details: {{ gig.details }}</p>
-    <p>Total cost: £{{ gig.total_cost }} (£{{ gig.cost_per_player }} × {{ gig.number_of_charging_players }} people + £{{ gig.cost_per_car }} × {{ gig.number_of_cars }} cars + £{{ gig.cost_extras }})
-
     
+    <h1>{{ gig.title }} </h1>
+    <p>{{ gig.get_status_icon }} {{ gig.get_status }} | <a href="{% url 'edit_gig' gig.id %}">Edit details</a> | <a href="{% url 'gigs' %}">Back</a></p>
 
-    <p>
-        <h2>Availability</h2>
-    </p>
+    <section class="gig-section">
+        <h2>Details</h2>
+        <table class="gig-facts">
+            <tr><th>When</th><td>{{ gig.date }}{% if gig.start_time %}, dancing starts at {{ gig.start_time }}{% endif %}</td></tr>
+            <tr><th>Where</th><td>{{ gig.location }}</td></tr>
+            {% if gig.details %}<tr><th>Details</th><td>{{ gig.details|linebreaksbr }}</td></tr>{% endif %}
+        </table>
+    </section>
 
-    <p>
-        {% for a in availability %}
-        {{ a.get_availability_icon }} {{ a.player }}: {{ a }} {% if a.notes %}({{ a.notes }}){% endif %}<br>
-        {% endfor %}
-    </p>
+    <section class="gig-section" id="cost-section">
+        <h2>Cost</h2>
+        <details class="cost-breakdown">
+            <summary>Total cost: £{{ gig.total_cost }}</summary>
+            <table>
+                {% for player, fee in gig.player_fees %}
+                    <tr><td>{{ player }}</td><td>£{{ fee|floatformat:2 }}</td></tr>
+                {% endfor %}
+                {% for instrument in gig.unassigned_instruments %}
+                    <tr><td>⚠️ {{ instrument }} (no player yet)</td><td>£{{ gig.cost_per_player }}</td></tr>
+                {% endfor %}
+                <tr><td>Cars (£{{ gig.cost_per_car }} × {{ gig.number_of_cars }})</td><td>£{{ gig.cars_cost }}</td></tr>
+                <tr><td>Extras</td><td>£{{ gig.cost_extras }}</td></tr>
+            </table>
+        </details>
 
-    <p>
-        
-        <span id="availability-enter">
-
-            {% if user %}
-                {% url 'availability_form' gig.id user.id as url %}
-            {% else %}
-                {% url 'availability_entry_point' gig.id as url %}
+        {% if user %}
+            {% get_what_user_is_playing_at_gig gig user as user_instruments %}
+            {% if user_instruments %}
+                <p>{{ user }}, your fee for this gig: <strong>{% get_player_fee gig user %}</strong></p>
             {% endif %}
+        {% endif %}
 
-            <a href="{{ url }}">
-                Enter my availability
-            </a>
-        </span> 
-        <button id='availability-link'>🔗</button><span id="link-copied" class="hidden fader">Link copied</span>
-    </p>
+        {% if gig.permit_custom_fee %}
+        <p>
+            <a href="{% url 'custom_fee_entry_point' gig.id %}">Set my fee</a>
+            <button id='fee-link'>🔗</button><span id="fee-link-copied" class="hidden fader">Link copied</span>
+        </p>
+        {% endif %}
+    </section>
 
+    <section class="gig-section">
+        <h2>Availability</h2>
+
+        <div class="availability-cards">
+            {% for a in availability %}
+                <div class="availability-card availability-{{ a.availability }}" title="{{ a }}">
+                    <div class="availability-name">{{ a.player }}</div>
+                    {% if gig.permit_custom_fee and a.availability != 'UN' %}
+                        <div class="availability-extra availability-fee">{% get_player_fee gig a.player %}</div>
+                    {% endif %}
+                    {% if a.notes %}<div class="availability-extra availability-notes">{{ a.notes }}</div>{% endif %}
+                </div>
+            {% endfor %}
+        </div>
+
+        <p>
+            <span id="availability-enter">
+
+                {% if user %}
+                    {% url 'availability_form' gig.id user.id as url %}
+                {% else %}
+                    {% url 'availability_entry_point' gig.id as url %}
+                {% endif %}
+
+                <a href="{{ url }}">
+                    Enter my availability
+                </a>
+            </span>
+            <button id='availability-link'>🔗</button><span id="link-copied" class="hidden fader">Link copied</span>
+        </p>
+    </section>
+
+    <section class="gig-section">
     <h2>Players</h2>
 
     <div id="select-players">
@@ -104,7 +262,7 @@
                         <select id="{{ instrument.id }}">
                             <option value="-1" {% if current_player == -1 %}selected{% endif %}>Choose player...</option>
                             {% for player in instrument.player_set.all %}
-                                <option value="{{ player.id }}" {% if current_player == player.id %}selected{% endif %}>{{ player }} - {% get_player_availability player.id gig.id %}</option>
+                                <option value="{{ player.id }}" {% if current_player == player.id %}selected{% endif %}>{{ player }} - {% get_player_availability player.id gig.id %}{% if gig.permit_custom_fee %} - {% get_player_fee gig player %}{% endif %}</option>
                             {% endfor %}
                         </select>
                     </td>
@@ -121,5 +279,6 @@
         </div>
         <button id="unlock-player-changes">Make changes to lineup</button>
     </div>
+    </section>
 
 {% endblock content %}

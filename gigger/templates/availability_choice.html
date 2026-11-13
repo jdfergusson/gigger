@@ -5,38 +5,257 @@
 
 {% block js %}
 $(function() {
-    $('button').click(function() {
+    var spinner = $('#custom-fee');
+
+    // Every change is saved as soon as it is made, sending the page's current state
+    function save() {
+        var data = {
+            availability: $('.availability-answer.current').attr('id') || '',
+            notes: $('#notes').val()
+        };
+        {% if gig.permit_custom_fee %}
+            data.choice = $('#custom-choice').hasClass('current') ? 'custom' : 'default';
+            if (data.choice === 'custom') {
+                data.custom_fee = spinner.val();
+            }
+        {% endif %}
         $.ajax({
             type: 'POST',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
             url: '{% url "availability_set" gig.id player.id %}',
-            data: {
-                availability: this.id,
-                notes: $('#notes').val()
-            },
-            success: function(data) {
-                window.location.href=data.redirect
-            },
+            data: data
         });
+    }
+
+    $('.availability-answer').on('click', function() {
+        if ($(this).hasClass('current')) return;
+        $('.availability-answer').removeClass('current');
+        $(this).addClass('current');
+        save();
     });
+
+    // Wait for a pause in typing before saving notes
+    var notesTimer;
+    $('#notes').on('input', function() {
+        clearTimeout(notesTimer);
+        notesTimer = setTimeout(save, 500);
+    });
+
+    $('#default-choice').on('click', function() {
+        if ($(this).hasClass('current')) return;
+        $(this).addClass('current');
+        $('#custom-choice').removeClass('current');
+        // Hide the custom value but remember it in case they switch back
+        spinner.data('fee', spinner.val()).val('').prop('disabled', true);
+        save();
+    });
+
+    $('#custom-choice').on('click', function() {
+        if ($(this).hasClass('current')) return;
+        $(this).addClass('current');
+        $('#default-choice').removeClass('current');
+        spinner.prop('disabled', false).val(spinner.data('fee')).focus();
+        save();
+    });
+
+    spinner.on('input', save);
 })
 {% endblock js %}
 
+{% block css %}
+    .avail-page {
+        max-width: 30em;
+    }
+
+    .avail-header h1 {
+        margin: 0.5em 0 0.15em 0;
+        line-height: 1.2;
+    }
+
+    .gig-link {
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .gig-link:hover {
+        text-decoration: underline;
+    }
+
+    .gig-facts {
+        list-style: none;
+        margin: 0.5em 0 0 0;
+        padding: 0;
+    }
+
+    .gig-facts li {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5em;
+        /* Override the site-wide mobile list padding */
+        padding: 0.15em 0;
+    }
+
+    .fact-icon {
+        flex: 0 0 1.4em;
+        text-align: center;
+    }
+
+    .gig-details {
+        margin: 0.6em 0 0 0;
+        padding-left: 0.8em;
+        border-left: 3px solid #cccccc;
+        color: #444444;
+    }
+
+    .avail-subtitle {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.2em 0.6em;
+        margin: 1.2em 0 0 0;
+        font-size: 1.3em;
+    }
+
+    .avail-subtitle .tiny {
+        font-size: 0.6em;
+    }
+
+    .avail-label {
+        display: block;
+        margin: 1.5em 0 0.4em 0;
+        font-weight: bold;
+    }
+
+    #notes {
+        box-sizing: border-box;
+        width: 100%;
+        font-size: 1em;
+        padding: 0.5em;
+    }
+
+    .choices {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .choice {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4em;
+        box-sizing: border-box;
+        width: 100%;
+        min-height: 3.2em;
+        padding: 0.7em;
+        border: 2px solid grey;
+        border-radius: 5px;
+        font-size: 1.1em;
+        cursor: pointer;
+    }
+
+    .fee-option {
+        background-color: #dce8f7;
+        border-color: #a9c3e6;
+        color: #3d5a80;
+    }
+
+    .fee-option.current {
+        background-color: #2f6fd0;
+        border-color: #1a3f7a;
+        outline: 2px solid #2f6fd0;
+        outline-offset: 2px;
+        color: white;
+        font-weight: bold;
+    }
+
+    #custom-fee {
+        font-size: 1em;
+        padding: 0.3em;
+        width: 5em;
+        cursor: text;
+    }
+
+    /* Let clicks on the disabled spinner fall through to the custom fee button */
+    #custom-fee:disabled {
+        pointer-events: none;
+    }
+
+    .answer-AV {
+        background-color: #c8f0c6;
+        border-color: #7fc47b;
+    }
+
+    .answer-IF {
+        background-color: #fbeeb8;
+        border-color: #e0c55a;
+    }
+
+    .answer-UN {
+        background-color: #f6cdd2;
+        border-color: #d88893;
+    }
+
+    /* Their previous answer, if they've given one */
+    .availability-answer.current {
+        font-weight: bold;
+        outline: 2px solid #555555;
+        outline-offset: 2px;
+    }
+
+    .avail-back {
+        margin-top: 1.5em;
+        background: none;
+        color: inherit;
+    }
+{% endblock css %}
+
 {% block content %}
-<h3>Availability for {{ gig.title }}</h3>
-<h1>Hello {{ player }} <a href="{% url 'who_am_i' %}" class="tiny">(not you?)</a></h1>
+<div class="avail-page">
+    <div class="avail-header">
+        <h1><a href="{% url 'view_gig' gig.id %}" class="gig-link">{{ gig.title }}</a></h1>
+        <ul class="gig-facts">
+            <li><span class="fact-icon">📅</span><span>{{ gig.date|date:"l j F Y" }}</span></li>
+            {% if gig.start_time %}<li><span class="fact-icon">🕖</span><span>Dancing starts at {{ gig.start_time|time:"H:i" }}</span></li>{% endif %}
+            {% if gig.location %}<li><span class="fact-icon">📍</span><span>{{ gig.location }}</span></li>{% endif %}
+        </ul>
+        {% if gig.details %}<p class="gig-details">{{ gig.details|linebreaksbr }}</p>{% endif %}
+        <p class="avail-subtitle">
+            <span>Availability for {{ player }}</span>
+            <a href="{% url 'availability_entry_point' gig.id %}" class="tiny">Not {{ player }}?</a>
+        </p>
+    </div>
 
-<h3>Are you free for on {{ gig.date }} for a gig at {{ gig.location }}?</h3>
-<p>Details: {{ gig.details }}</p>
+    <span class="avail-label">Are you free for this gig?</span>
+    <div class="choices">
+        {% for ar in availability_choices %}
+            <button type="button" id="{{ ar.0 }}"
+                class="choice availability-answer answer-{{ ar.0 }} {% if response.availability == ar.0 %}current{% endif %}">
+                {{ ar.1 }}
+            </button>
+        {% endfor %}
+    </div>
 
-<p>
-    Add any clarification or notes:<br>
-    <input type="text" id="notes" />
-</p>
-<p>
-    Then answer, I am:<br>
-    {% for ar in availability_choices %}
-        <button type="button" id="{{ ar.0 }}">{{ ar.1 }}</button>
-    {% endfor %}
-</p>
+    <label class="avail-label" for="notes">Details:</label>
+    <input type="text" id="notes" value="{{ response.notes|default:'' }}">
+
+    {% if gig.permit_custom_fee %}
+        <span class="avail-label">Your fee</span>
+        <div class="choices">
+            <button type="button" id="default-choice" class="choice fee-option {% if fee.wants_standard_fee %}current{% endif %}">
+                Charge the default fee (£{{ gig.cost_per_player }})
+            </button>
+
+            <div id="custom-choice" class="choice fee-option {% if not fee.wants_standard_fee %}current{% endif %}" role="button" tabindex="0">
+                Charge a custom fee: £<input type="number" id="custom-fee" min="0" step="1" inputmode="numeric"
+                    data-fee="{{ fee.custom_fee }}"
+                    {% if fee.wants_standard_fee %}disabled{% else %}value="{{ fee.custom_fee }}"{% endif %}>
+            </div>
+        </div>
+    {% endif %}
+
+    <button type="button" class="choice avail-back" onclick="window.location.href='{% url 'view_gig' gig.id %}';">
+        Back
+    </button>
+</div>
 {% endblock content %}
