@@ -6,6 +6,9 @@
 {% block js %}
 $(function() {
     $('.player input[type=checkbox]').on('change', function() {
+        // Light up or grey out the instrument card straight away
+        $(this).closest('.instrument-card').toggleClass('enabled', this.checked);
+
         var player = $(this).closest('.player');
         var checked = player.find('input[type=checkbox]:checked');
         $.ajax({
@@ -28,43 +31,93 @@ $(function() {
 {% endblock js %}
 
 {% block css %}
+    /* Each player is a box with a clear header bar that opens to show their instruments */
     .player {
-        border-bottom: 1px solid #aaaaaa;
-        padding: 0.6em 0;
+        max-width: 40em;
+        margin-bottom: 10px;
+        border: 1px solid #aaaaaa;
+        border-radius: 8px;
+        background-color: white;
+        overflow: hidden;
     }
 
     .player summary {
+        display: flex;
+        align-items: center;
+        gap: 0.6em;
+        padding: 0.7em 0.9em;
+        background-color: #f2f2f2;
+        font-size: 1.3em;
         cursor: pointer;
-        font-size: 1.2em;
+        list-style: none;
+        user-select: none;
     }
 
-    .player-instruments {
-        padding: 0.5em 0 0 1.5em;
+    .player summary:hover {
+        background-color: #e6e6e6;
+    }
+
+    /* Replace the small default triangle with a bigger arrow that turns when open */
+    .player summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .player summary::before {
+        content: "▶";
+        font-size: 0.7em;
+        color: #666666;
+        transition: transform 0.15s;
+    }
+
+    .player[open] summary::before {
+        transform: rotate(90deg);
+    }
+
+    .player[open] summary {
+        background-color: #dce8f7;
+        border-bottom: 1px solid #a9c3e6;
+    }
+
+    .player-icons {
+        margin-left: auto;
+    }
+
+    .player .instrument-cards {
+        padding: 0.9em;
     }
 
     .add-player {
         margin-top: 2.5em;
     }
-
-    .player label {
-        display: block;
-        padding: 0.3em 0;
-    }
 {% endblock css %}
+
+{% block mobilecss %}
+    /* Name box and Add button, easier to tap and type in */
+    .add-player input[type=text], .add-player input[type=submit] {
+        box-sizing: border-box;
+        font-size: 1.15em;
+        padding: 0.6em;
+        border-radius: 5px;
+    }
+
+    .add-player input[type=submit] {
+        margin-top: 0.8em;
+    }
+{% endblock mobilecss %}
 
 {% block content %}
     <h1>Players</h1>
-    <p><a href="{% url 'home' %}">Back</a></p>
 
     {% for player in players %}
         <details class="player" data-player-id="{{ player.id }}">
             <summary>{{ player }} <span class="player-icons">{% for instrument in player.can_play.all %}{{ instrument.icon }}{% endfor %}</span></summary>
-            <div class="player-instruments">
+            <div class="instrument-cards">
                 {% for instrument in instruments %}
-                    <label>
+                    <label class="instrument-card {% if instrument in player.can_play.all %}enabled{% endif %}">
                         <input type="checkbox" value="{{ instrument.id }}" data-icon="{{ instrument.icon }}"
                             {% if instrument in player.can_play.all %}checked{% endif %}>
-                        {{ instrument.icon }} {{ instrument }}
+                        <span class="instrument-icon">{{ instrument.icon }}</span>
+                        <span>{{ instrument }}</span>
                     </label>
                 {% endfor %}
             </div>

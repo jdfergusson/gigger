@@ -1,0 +1,13 @@
+{# One form field (edit gig and propose gig pages). Checkboxes get their label beside them; everything else has it above. #}
+{% if field.widget_type == 'checkbox' %}
+    <label class="form-check">
+        {{ field }}
+        <span>{{ field.label }}</span>
+    </label>
+{% else %}
+    <div class="form-field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+    </div>
+{% endif %}
+{% for error in field.errors %}<p class="form-error">{{ error }}</p>{% endfor %}

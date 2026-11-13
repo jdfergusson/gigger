@@ -1,7 +1,7 @@
-{% load giggertags %}
-<meta name="viewport" content="width=device-width, initial-scale=1">
+{% load giggertags static %}
 <html>
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{% block title %}{% endblock title %}</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -9,140 +9,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Ubuntu:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400;1,500;1,700&display=swap" rel="stylesheet">
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+<link rel="stylesheet" href="{% static 'gigger/site.css' %}">
+
+{# Page-specific styles #}
 <style>
-    body, input, textarea, select, button {
-        font-family: ubuntu-regular, sans-serif;
-    }
-    th {
-        text-align: center;
-        padding: 5px;
-        vertical-align: center;
-    }
-    td {
-        text-align: center;
-        padding: 5px;
-        vertical-align: center;
-    }
-    h2 {
-        display: inline;
-    }
-    .fader {
-        transition: opacity 0.3s linear;
-    }
-    .hidden {
-        opacity: 0;
-    }
-    .active {
-        opacity: 1;
-    }
-    #availability-link {
-        padding: 10px;
-        margin-left: 10px;
-        margin-right: 10px;
-    }
-
-    .player-name {
-        display: inline-block;
-        border: 2px solid grey;
-        border-radius: 5px;
-        margin: 5px;
-        padding: 5px;
-    }
-
-    .player-name a {
-        text-decoration: none;
-    }
-
-    .btn-good {
-        background-color: #bcffba; 
-    }
-
-    .btn-bad {
-        background-color: #eda8b2;
-    }
-
-    .btn-good, .btn-bad {
-        border-radius: 5px;
-    }
-
-    .tiny {
-        font-size: x-small;
-        text-decoration: none;
-    }
-
-    @media only screen and (min-width: 1001px) {
-        .mob-only {
-            display: none;
-        }
-    }
-
-    .player-with-instrument {
-        white-space: nowrap;
-        font-family: "Noto Color Emoji", sans-serif;
-        font-optical-sizing: auto;
-        font-weight: 400;
-        font-style: normal;
-        background-color: #aaaaaa;
-        word-spacing: 0;
-        padding: 0.5em;
-        border-radius: 0.3em;
-        display: inline-block;
-        margin: 0.25em;
-    }
-
-    .unassigned {
-        background-color: #ff8f8f;
-    }
-
-
     @media only screen and (max-width: 1000px) {
-        body, input, textarea, select, button {
-            /*font-size: 14pt;*/
-        }
-        label {
-            display: block;
-        }
-
-        .mob-only {
-            display: auto;
-        }
-
-        div {
-            padding-top: 0.5em;
-        }
-
-        input, textarea, select {
-            width: 100%;
-        }
-
-        input[type=checkbox] {
-            zoom: 1.5;
-            width: auto;
-        }
-
-        td {
-            padding-bottom: 5px;
-            padding-top: 5px;
-        }
-
-        button {
-            padding: 5px;
-        }
-
-        li {
-            padding-bottom: 10px;
-        }
-
-        .side-by-side-container {
-            display: flex;
-            justify-content: space-around;
-        }
-
-        .side-by-side-element {
-            width: 100%;
-            margin: 5px;
-        }
-
         {% block mobilecss %}{% endblock mobilecss %}
     }
 
@@ -176,6 +48,18 @@ function copyToClipboard(text) {
 </script>
 </head>
 <body>
+
+    <header class="site-header">
+        <a href="{% url 'home' %}" class="site-header-home" title="Home">🏠</a>
+        <span class="site-header-title">Gigger</span>
+        <span class="site-header-user">
+            {% if current_player %}
+                <a href="{% url 'me' %}">👤 {{ current_player }}</a>
+            {% else %}
+                <a href="{% url 'who_am_i' %}">Who are you?</a>
+            {% endif %}
+        </span>
+    </header>
 
     {% block content %}{% endblock content%}
 

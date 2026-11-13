@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user }}{% endblock title %}
+
+{% block css %}
+    .me-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(14em, 1fr));
+        gap: 12px;
+        max-width: 50em;
+        margin: 1em 0;
+    }
+
+    .me-card {
+        display: block;
+        box-sizing: border-box;
+        padding: 1em;
+        border: 1px solid #aaaaaa;
+        border-radius: 8px;
+        background-color: #f7f7f7;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    a.me-card:hover {
+        background-color: #ececec;
+        border-color: #888888;
+    }
+
+    .me-card-icon {
+        font-size: 1.6em;
+        line-height: 1;
+    }
+
+    .me-card-title {
+        margin-top: 0.4em;
+        font-size: 1.15em;
+        font-weight: bold;
+    }
+
+    .me-card-text {
+        margin-top: 0.3em;
+        font-size: 0.9em;
+        color: #555555;
+    }
+
+    /* Stop the site-wide mobile div padding from spreading the cards out */
+    .me-cards, .me-card div {
+        padding-top: 0;
+    }
+{% endblock css %}
+
+{% block mobilecss %}
+    /* On phones, put "Not you?" on its own line under the greeting */
+    .me-not-you {
+        display: block;
+        margin-top: 0.3em;
+    }
+{% endblock mobilecss %}
+
+{% block content %}
+    <h1>Hello {{ user }} <a href="{% url 'who_am_i' %}" class="tiny me-not-you">Not you?</a></h1>
+
+    <div class="me-cards">
+        <a href="{% url 'my_gigs' %}" class="me-card">
+            <div class="me-card-icon">🎻</div>
+            <div class="me-card-title">My future gigs</div>
+            <div class="me-card-text">Gigs you're playing in</div>
+        </a>
+
+        <a href="{% url 'my_history' %}" class="me-card">
+            <div class="me-card-icon">📜</div>
+            <div class="me-card-title">My gig history</div>
+            <div class="me-card-text">Gigs you've played and what you charged</div>
+        </a>
+
+        <a href="{% url 'my_missing_availability' %}" class="me-card">
+            <div class="me-card-icon">❓</div>
+            <div class="me-card-title">My availability TODOs</div>
+            <div class="me-card-text">Gigs you haven't said whether you can do</div>
+        </a>
+
+        {# Several links, so the card itself isn't one #}
+        <div class="me-card">
+            <div class="me-card-icon">📅</div>
+            <div class="me-card-title">Add gigs to your calendar</div>
+            <div class="me-card-text">
+                <a href="{{ google_calendar_url }}" target="_blank">Google Calendar</a> |
+                <a href="{{ outlook_calendar_url }}" target="_blank">Outlook</a> |
+                <a href="{{ calendar_url }}">Other calendar apps</a>
+            </div>
+        </div>
+
+        {% if user.is_admin %}
+            <a href="{% url 'manage_players' %}" class="me-card">
+                <div class="me-card-icon">👥</div>
+                <div class="me-card-title">Edit players</div>
+                <div class="me-card-text">Add players and set their instruments</div>
+            </a>
+        {% endif %}
+    </div>
+{% endblock content %}

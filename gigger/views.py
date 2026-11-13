@@ -1,5 +1,5 @@
 import datetime
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from django.shortcuts import render
 from django.http import (
@@ -9,6 +9,7 @@ from django.http import (
     QueryDict,
 )
 from django.urls import reverse
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.shortcuts import (
     render,
     get_object_or_404,
@@ -69,10 +70,12 @@ def create_gig(request):
             new_gig.required_instruments.set([i for i in Instrument.objects.all()])
             new_gig.cost_extras = 10
             new_gig.save()
-        return redirect(reverse('edit_gig', args=[new_gig.id]))
+            return redirect(reverse('edit_gig', args=[new_gig.id]))
     else:
         form = CreateGigForm()
-        return render(request, "create_gig.html", {"form": form})
+
+    # A new form, or one that failed validation and now carries its errors
+    return render(request, "create_gig.html", {"form": form})
 
 
 def edit_gig(request, gig_id):
@@ -80,14 +83,17 @@ def edit_gig(request, gig_id):
 
     if request.method == "POST":
         form = EditGigForm(request.POST, instance=gig)
-        if not form.is_valid():
-            print(form.errors.as_data())
-        form.save()
-        return redirect(reverse('view_gig', args=[gig.id]))
+        if form.is_valid():
+            form.save()
+            return redirect(reverse('view_gig', args=[gig.id]))
+        # Validation copies the rejected values onto the gig; reload it so the heading shows the saved title.
+        # The form redisplays from the submitted data, so this doesn't lose anything typed.
+        gig.refresh_from_db()
     else:
-
         form = EditGigForm(instance=gig)
-        return render(request, "edit_gig.html", {"form": form, "gig": gig})
+
+    # A fresh form, or one that failed validation and now carries its errors
+    return render(request, "edit_gig.html", {"form": form, "gig": gig})
     
 
 def view_gig(request, gig_id):
@@ -114,30 +120,20 @@ def _save_custom_fee(gig, player, data):
     CustomFee.objects.update_or_create(gig=gig, player=player, defaults=defaults)
 
 
-def custom_fee_entry_point(request, gig_id):
+def custom_fee(request, gig_id):
     gig = get_object_or_404(Gig, id=gig_id)
-    user = _get_user_or_none(request)
-
-    # Skip the "who are you?" step if we already know, unless they asked to change
-    if user is not None and 'choose' not in request.GET:
-        return redirect(reverse('custom_fee', args=[gig.id, user.id]))
-
-    return render(request, "custom_fee_entry_point.html", {
-        "gig": gig,
-        "players": Player.objects.all().order_by('name'),
-    })
-
-
-def custom_fee(request, gig_id, player_id):
-    gig = get_object_or_404(Gig, id=gig_id)
-    player = get_object_or_404(Player, id=player_id)
+    player = _get_user_or_none(request)
 
     if request.method == "POST":
         # Each change is saved via ajax as soon as it is made
+        if player is None:
+            return JsonResponse({'success': False}, status=403)
         _save_custom_fee(gig, player, request.POST)
         return JsonResponse({'success': True})
 
-    request.session['uid'] = player.id
+    if player is None:
+        return redirect(_who_am_i_url(request.path))
+
     return render(request, "custom_fee.html", {"gig": gig, "player": player, "fee": _get_custom_fee(gig, player)})
 
 
@@ -168,24 +164,31 @@ def assign_player(request, gig_id):
 
 
 def gigs(request):
-    user = _get_user_or_none(request)
     context = {
         'incomplete_gigs': Gig.objects.filter(status__in=[Gig.Status.CONFIRMED, Gig.Status.PROPOSED]).order_by('date'),
         'complete_gigs': Gig.objects.filter(status=Gig.Status.DONE).order_by('-date'),
         'cancelled_gigs': Gig.objects.filter(status=Gig.Status.CANCELLED).order_by('date'),
-        'user': user,
     }
-
-    if user is not None:
-        # Calendar apps subscribe to webcal:// links; Google and Outlook take the feed as a parameter
-        feed_url = request.build_absolute_uri(reverse('player_calendar', args=[user.id]))
-        webcal_url = 'webcal://' + feed_url.split('://', 1)[1]
-        context['calendar_url'] = webcal_url
-        context['google_calendar_url'] = 'https://calendar.google.com/calendar/r?cid=' + quote(webcal_url, safe='')
-        context['outlook_calendar_url'] = 'https://outlook.live.com/calendar/0/addfromweb?url=' + quote(feed_url, safe='') \
-            + '&name=' + quote(f'NM Gigs - {user.name}', safe='')
-
     return render(request, "gigs.html", context)
+
+
+def me(request):
+    user = _get_user_or_none(request)
+
+    if user is None:
+        return redirect(reverse('who_am_i'))
+
+    # Calendar apps subscribe to webcal:// links; Google and Outlook take the feed as a parameter
+    feed_url = request.build_absolute_uri(reverse('player_calendar', args=[user.id]))
+    webcal_url = 'webcal://' + feed_url.split('://', 1)[1]
+    context = {
+        'user': user,
+        'calendar_url': webcal_url,
+        'google_calendar_url': 'https://calendar.google.com/calendar/r?cid=' + quote(webcal_url, safe=''),
+        'outlook_calendar_url': 'https://outlook.live.com/calendar/0/addfromweb?url=' + quote(feed_url, safe='')
+            + '&name=' + quote(f'NM Gigs - {user.name}', safe=''),
+    }
+    return render(request, "me.html", context)
 
 
 def _ical_escape(text):
@@ -260,14 +263,19 @@ def player_calendar(request, player_id):
     return HttpResponse(body, content_type='text/calendar; charset=utf-8')
 
 
-def availability_entry_point(request, gig_id):
+def availability(request, gig_id):
     gig = get_object_or_404(Gig, id=gig_id)
-    return render(request, "availability_entry_point.html", {"gig": gig, "players": Player.objects.all().order_by('name')})
+    player = _get_user_or_none(request)
 
+    if request.method == "POST":
+        if player is None:
+            return JsonResponse({'success': False}, status=403)
+        _save_availability(gig, player, request.POST)
+        return JsonResponse({'success': True})
 
-def availability_form(request, gig_id, player_id):
-    gig = get_object_or_404(Gig, id=gig_id)
-    player = get_object_or_404(Player, id=player_id)
+    if player is None:
+        return redirect(_who_am_i_url(request.path))
+
     context = {
         'gig': gig,
         'player': player,
@@ -275,36 +283,46 @@ def availability_form(request, gig_id, player_id):
         'fee': _get_custom_fee(gig, player),
         'response': AvailabilityResponse.objects.filter(gig=gig, player=player).first(),
     }
-    request.session['uid'] = player_id
     return render(request, "availability_choice.html", context)
 
 
-def availability_set(request, gig_id, player_id):
-    gig = get_object_or_404(Gig, id=gig_id)
-    player = get_object_or_404(Player, id=player_id)
-    if request.POST.get('availability'):
+def _save_availability(gig, player, data):
+    if data.get('availability'):
         AvailabilityResponse.objects.update_or_create(
             gig=gig,
             player=player,
             defaults={
-                'availability': request.POST['availability'],
-                'notes': request.POST.get('notes', ''),
+                'availability': data['availability'],
+                'notes': data.get('notes', ''),
             }
         )
-    elif 'notes' in request.POST:
+    elif 'notes' in data:
         # Notes alone only update an existing answer; with no answer yet the page
         # sends them along once an availability is chosen
-        AvailabilityResponse.objects.filter(gig=gig, player=player).update(notes=request.POST['notes'])
+        AvailabilityResponse.objects.filter(gig=gig, player=player).update(notes=data['notes'])
 
-    if gig.permit_custom_fee and 'choice' in request.POST:
-        _save_custom_fee(gig, player, request.POST)
-    return JsonResponse({'redirect': reverse('view_gig', args=[gig.id])})
+    if gig.permit_custom_fee and 'choice' in data:
+        _save_custom_fee(gig, player, data)
+
+
+def _who_am_i_url(next_url):
+    """The "who are you?" page, which sends the user on to next_url once they've chosen"""
+    return reverse('who_am_i') + '?' + urlencode({'next': next_url})
+
+
+def _safe_next(request):
+    """The ?next= URL if it's a page on this site, otherwise the user page"""
+    next_url = request.GET.get('next', '')
+    if url_has_allowed_host_and_scheme(next_url, allowed_hosts={request.get_host()}):
+        return next_url
+    return reverse('me')
 
 
 def who_am_i(request):
     context = {
         "players": Player.objects.all().order_by('name'),
         "user": _get_user_or_none(request),
+        "next": _safe_next(request),
     }
     return render(request, 'whoami.html', context)
 
@@ -315,9 +333,9 @@ def i_am(request, player_id):
         request.session['uid'] = player.id
     except Player.DoesNotExist:
         # Remove old player
-        request.session.pop('uid')
-        
-    return redirect(reverse('home'))
+        request.session.pop('uid', None)
+
+    return redirect(_safe_next(request))
 
 def my_gigs(request):
     user = _get_user_or_none(request)

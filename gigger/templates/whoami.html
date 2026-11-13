@@ -25,7 +25,7 @@ $(function() {
 
 <p>
     {% for player in players %}
-        <span class="player-name"><a href="{% url 'i_am' player.id %}">{{ player }}</a></span>
+        <span class="player-name"><a href="{% url 'i_am' player.id %}?next={{ next|urlencode }}">{{ player }}</a></span>
     {% endfor %}
 </p>
 

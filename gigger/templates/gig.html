@@ -33,7 +33,7 @@
             setTimeout(function() {
                 $("#link-copied").addClass("hidden");
             }, 3000);
-            {% url "availability_entry_point" gig.id as relative_url %} 
+            {% url "availability" gig.id as relative_url %}
             copyToClipboard('{% absolute_url relative_url %}');
 
         });
@@ -45,7 +45,7 @@
             setTimeout(function() {
                 $("#fee-link-copied").addClass("hidden");
             }, 3000);
-            {% url "custom_fee_entry_point" gig.id as fee_relative_url %}
+            {% url "custom_fee" gig.id as fee_relative_url %}
             copyToClipboard('{% absolute_url fee_relative_url %}');
         });
 
@@ -149,27 +149,23 @@
         grid-column: 3;
     }
 
-    .availability-AV {
-        background-color: #c8f0c6;
-        border-color: #7fc47b;
+    /* The shared style centres players (for table cells elsewhere); here they sit on the left, except on phones */
+    @media only screen and (min-width: 1001px) {
+        .player-container {
+            justify-content: flex-start;
+        }
     }
 
-    .availability-IF {
-        background-color: #fbeeb8;
-        border-color: #e0c55a;
-    }
-
-    .availability-UN {
-        background-color: #f6cdd2;
-        border-color: #d88893;
-    }
-
-    #availability-link, #fee-link {
-        padding: 10px;
-        margin-left: 10px;
-        margin-right: 10px;
-    }
 {% endblock css %}
+
+{% block mobilecss %}
+    /* Centre the tables and availability list as a whole on phones (their contents stay aligned in columns).
+       The extra .gig-section makes these win over the css block, which comes later in the page. */
+    .gig-section .gig-facts, .gig-section .cost-breakdown table, .gig-section .availability-cards {
+        margin-left: auto;
+        margin-right: auto;
+    }
+{% endblock mobilecss %}
 
 {% block content %}
     
@@ -209,9 +205,9 @@
         {% endif %}
 
         {% if gig.permit_custom_fee %}
-        <p>
-            <a href="{% url 'custom_fee_entry_point' gig.id %}">Set my fee</a>
-            <button id='fee-link'>🔗</button><span id="fee-link-copied" class="hidden fader">Link copied</span>
+        <p class="link-row">
+            <a href="{% url 'custom_fee' gig.id %}">Set my fee</a>
+            <span class="copy-wrap"><button id='fee-link' class="copy-button" title="Copy link">📋</button><span id="fee-link-copied" class="copied-message hidden fader">Link copied</span></span>
         </p>
         {% endif %}
     </section>
@@ -231,20 +227,9 @@
             {% endfor %}
         </div>
 
-        <p>
-            <span id="availability-enter">
-
-                {% if user %}
-                    {% url 'availability_form' gig.id user.id as url %}
-                {% else %}
-                    {% url 'availability_entry_point' gig.id as url %}
-                {% endif %}
-
-                <a href="{{ url }}">
-                    Enter my availability
-                </a>
-            </span>
-            <button id='availability-link'>🔗</button><span id="link-copied" class="hidden fader">Link copied</span>
+        <p class="link-row">
+            <a href="{% url 'availability' gig.id %}" id="availability-enter">Enter my availability</a>
+            <span class="copy-wrap"><button id='availability-link' class="copy-button" title="Copy link">📋</button><span id="link-copied" class="copied-message hidden fader">Link copied</span></span>
         </p>
     </section>
 

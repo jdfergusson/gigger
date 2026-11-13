@@ -35,34 +35,6 @@ $(function() {
         border: 1px solid black;
     }
 
-    h2 {
-        display: inline;
-    }
-
-    .player-with-instrument {
-        white-space: nowrap;
-        font-optical-sizing: auto;
-        font-weight: 400;
-        font-style: normal;
-        background-color: #aaaaaa;
-        word-spacing: 0;
-        padding: 0.5em;
-        border-radius: 0.3em;
-        display: inline-block;
-        margin: 0.25em;
-    }
-
-    .unassigned {
-        background-color: #ff8f8f;
-    }
-
-    .noto-emoji-gigger {
-        font-family: "Noto Emoji", sans-serif;
-        font-optical-sizing: auto;
-        font-weight: 500;
-        font-style: normal;
-    }
-
     .missing-availability td {
         padding: 0.6em 0.5em;
     }
@@ -81,19 +53,9 @@ $(function() {
         font-size: 0.85em;
         color: #555555;
     }
-
-    .player-container {
-        display: flex;
-        flex-flow: row wrap;
-        justify-content: center;
-    }
 {% endblock css %}
 
 {% block mobilecss %}
-    .t-notes, .t-price {
-        display: none;
-    }
-
     /* Stack gig details above the buttons. Selectors are more specific than
        the css block's so they win despite coming earlier in the page. */
     table.missing-availability, table.missing-availability tbody {
@@ -125,15 +87,15 @@ $(function() {
 {% block content %}
     <h1>Gigs for which {{ user }} hasn't filled in their availability</h1>
     <p>
-        <a href="{% url 'home' %}">Back</a> | <a href="{% url 'who_am_i' %}">Not you?</a>
+        <a href="{% url 'me' %}">Back</a> | <a href="{% url 'who_am_i' %}">Not you?</a>
     </p>
 
     
 
     <table class="missing-availability">
         {% for gig in gigs %}
-            <tr class="availability-buttons" data-url="{% url 'availability_set' gig.id user.id %}">
-                <td>{{ gig.get_status_icon }} <a href="{% url 'view_gig' gig.id %}">{{ gig.title }}</a><br>
+            <tr class="availability-buttons" data-url="{% url 'availability' gig.id %}">
+                <td>{{ gig.get_status_icon }} <a href="{% url 'availability' gig.id %}">{{ gig.title }}</a><br>
                     <span class="gig-date">{{ gig.date | date:"l d/m/Y" }}</span></td>
                 {% for ar in availability_choices %}
                     <td><button type="button" data-availability="{{ ar.0 }}">{{ ar.1 }}</button></td>

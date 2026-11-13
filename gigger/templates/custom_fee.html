@@ -15,7 +15,7 @@ $(function() {
         $.ajax({
             type: 'POST',
             headers: { "X-CSRFToken": '{{ csrf_token }}' },
-            url: '{% url "custom_fee" gig.id player.id %}',
+            url: '{% url "custom_fee" gig.id %}',
             data: data
         });
     }
@@ -44,112 +44,33 @@ $(function() {
 {% endblock js %}
 
 {% block css %}
-    .fee-page {
-        max-width: 30em;
-    }
-
-    .fee-header h1 {
-        margin: 0.5em 0 0.15em 0;
-        line-height: 1.2;
-    }
-
-    .fee-date {
-        margin: 0;
-        color: #666666;
-    }
-
-    .fee-subtitle {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: baseline;
-        gap: 0.2em 0.6em;
-        margin: 1.2em 0 0 0;
-        font-size: 1.3em;
-    }
-
-    .fee-subtitle .tiny {
-        font-size: 0.6em;
-    }
-
     .fee-choices {
-        display: flex;
-        flex-direction: column;
-        gap: 10px;
         margin: 1.5em 0;
     }
-
-    .fee-choice {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.4em;
-        box-sizing: border-box;
-        width: 100%;
-        min-height: 3.2em;
-        padding: 0.7em;
-        border: 2px solid grey;
-        border-radius: 5px;
-        font-size: 1.1em;
-        cursor: pointer;
-    }
-
-    .fee-option {
-        background-color: #dce8f7;
-        border-color: #a9c3e6;
-        color: #3d5a80;
-    }
-
-    .fee-option.current {
-        background-color: #2f6fd0;
-        border-color: #1a3f7a;
-        outline: 2px solid #2f6fd0;
-        outline-offset: 2px;
-        color: white;
-        font-weight: bold;
-    }
-
-    .fee-back {
-        background: none;
-        color: inherit;
-    }
-
-    #custom-fee {
-        font-size: 1em;
-        padding: 0.3em;
-        width: 5em;
-        cursor: text;
-    }
-
-    /* Let clicks on the disabled spinner fall through to the custom fee button */
-    #custom-fee:disabled {
-        pointer-events: none;
-    }
-
 {% endblock css %}
 
 {% block content %}
-<div class="fee-page">
-    <div class="fee-header">
-        <h1>{{ gig.title }}</h1>
-        <p class="fee-date">{{ gig.date }}</p>
-        <p class="fee-subtitle">
+<div class="narrow-page">
+    <div class="page-header">
+        {% include "gig_summary_header.html" %}
+        <p class="page-subtitle">
             <span>Set fee for {{ player }}</span>
-            <a href="{% url 'custom_fee_entry_point' gig.id %}?choose" class="tiny">Not {{ player }}?</a>
+            <a href="{% url 'who_am_i' %}?next={% url 'custom_fee' gig.id %}" class="tiny">Not {{ player }}?</a>
         </p>
     </div>
 
-    <div class="fee-choices">
-        <button type="button" id="default-choice" class="fee-choice fee-option {% if fee.wants_standard_fee %}current{% endif %}">
+    <div class="choices fee-choices">
+        <button type="button" id="default-choice" class="choice fee-option {% if fee.wants_standard_fee %}current{% endif %}">
             Charge the default fee (£{{ gig.cost_per_player }})
         </button>
 
-        <div id="custom-choice" class="fee-choice fee-option {% if not fee.wants_standard_fee %}current{% endif %}" role="button" tabindex="0">
+        <div id="custom-choice" class="choice fee-option {% if not fee.wants_standard_fee %}current{% endif %}" role="button" tabindex="0">
             Charge a custom fee: £<input type="number" id="custom-fee" min="0" step="1" inputmode="numeric"
                 data-fee="{{ fee.custom_fee }}"
                 {% if fee.wants_standard_fee %}disabled{% else %}value="{{ fee.custom_fee }}"{% endif %}>
         </div>
 
-        <button type="button" class="fee-choice fee-back" onclick="window.location.href='{% url 'view_gig' gig.id %}';">
+        <button type="button" class="choice choice-plain" onclick="window.location.href='{% url 'view_gig' gig.id %}';">
             Save
         </button>
     </div>

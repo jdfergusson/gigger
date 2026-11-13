@@ -22,7 +22,7 @@
 {% block content %}
     <h1>{{ user }}'s gig history</h1>
     <p>
-        <a href="{% url 'home' %}">Back</a> | <a href="{% url 'who_am_i' %}">Not you?</a>
+        <a href="{% url 'me' %}">Back</a> | <a href="{% url 'who_am_i' %}">Not you?</a>
     </p>
 
     {% if history %}

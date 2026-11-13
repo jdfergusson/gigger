@@ -14,22 +14,6 @@
         border: 1px solid black;
     }
 
-    h2 {
-        display: inline;
-    }
-
-    .noto-emoji-gigger {
-        font-optical-sizing: auto;
-        font-weight: 500;
-        font-style: normal;
-    }
-
-    .player-container {
-        display: flex;
-        flex-flow: row wrap;
-        justify-content: center;
-    }
-
     .gig-card {
         border: 1px solid black;
         border-radius: 0.5em;
@@ -60,13 +44,35 @@
     .gig-card-details {
         color: #555555;
     }
+    /* Headings are inline site-wide, so this one needs to be a block to get space below it */
+    .upcoming-heading {
+        display: block;
+        margin: 0.8em 0;
+    }
+
+    /* Round + button beside the "All upcoming gigs" heading */
+    .add-gig {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 1.3em;
+        height: 1.3em;
+        margin-left: 0.3em;
+        border-radius: 50%;
+        background-color: #555555;
+        color: white;
+        font-size: 0.9em;
+        line-height: 1;
+        text-decoration: none;
+        vertical-align: middle;
+    }
+
+    .add-gig:hover {
+        background-color: #222222;
+    }
 {% endblock css %}
 
 {% block mobilecss %}
-    .t-notes, .t-price {
-        display: none;
-    }
-
     /* The cards replace the upcoming gigs table on mobile */
     table.upcoming-gigs {
         display: none;
@@ -77,31 +83,14 @@
     <h1>Ness{% apostrophe %} Monsters Gigs</h1>
 
     <p>
-        <a href="https://fergfamily.co.uk/nm-pli.pdf" target="_blank">Public Liability Insurance</a><br>
-        <a href="https://fergfamily.co.uk/nm-pad.pdf" target="_blank">Music Pad</a><br>
-        <a href="{% url 'dances' %}">Dances and tunes</a><br>
+        <a href="https://fergfamily.co.uk/nm-pli.pdf" target="_blank">Public Liability Insurance</a> |
+        <a href="https://fergfamily.co.uk/nm-pad.pdf" target="_blank">Music Pad</a> |
+        <a href="{% url 'dances' %}">Dances and tunes</a>
     </p>
-
-    {% if user %}
-        <h3> Hello {{ user }}</h3>
-        <ul>
-            <li><a href="{% url 'my_gigs' %}">My future gigs</a></li>
-            <li><a href="{% url 'my_history' %}">My gig history</a></li>
-            <li><a href="{% url 'my_missing_availability' %}">My availability TODOs</a></li>
-            <li>Add your gigs to your calendar: <a href="{{ google_calendar_url }}" target="_blank">Google Calendar</a> | <a href="{{ outlook_calendar_url }}" target="_blank">Outlook</a> |<a href="{{ calendar_url }}">Other calendar apps</a></li>
-            {% if user.is_admin %}
-                <li><a href="{% url 'manage_players' %}">Edit players</a></li>
-            {% endif %}
-        </ul>
-        <a href="{% url 'who_am_i' %}">Not you?</a>
-    {% else %}
-        <h3>Hello!</h3>
-        <a href="{% url 'who_am_i' %}">Who are you?</a>
-    {% endif %}
 
     <hr />
 
-    <h3>All upcoming gigs - <a href="{% url 'create_gig' %}">Propose a gig</a></h3>
+    <h2 class="upcoming-heading">All upcoming gigs <a href="{% url 'create_gig' %}" class="add-gig" title="Propose a gig" aria-label="Propose a gig">+</a></h2>
 
     <div class="gig-cards mob-only">
         {% for gig in incomplete_gigs %}

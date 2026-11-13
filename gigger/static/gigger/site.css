@@ -1,0 +1,528 @@
+/* Styles shared across the whole site. Page-specific styles live in each template's css block. */
+
+/* ---------- Basics ---------- */
+
+body, input, textarea, select, button {
+    font-family: ubuntu-regular, sans-serif;
+}
+
+th {
+    text-align: center;
+    padding: 5px;
+    vertical-align: center;
+}
+
+td {
+    text-align: center;
+    padding: 5px;
+    vertical-align: center;
+}
+
+h2 {
+    display: inline;
+}
+
+.fader {
+    transition: opacity 0.3s linear;
+}
+
+.hidden {
+    opacity: 0;
+}
+
+.active {
+    opacity: 1;
+}
+
+.tiny {
+    font-size: x-small;
+    text-decoration: none;
+}
+
+.btn-good {
+    background-color: #bcffba;
+}
+
+.btn-bad {
+    background-color: #eda8b2;
+}
+
+.btn-good, .btn-bad {
+    border-radius: 5px;
+}
+
+/* ---------- Site header ---------- */
+
+.site-header {
+    /* Equal outer columns keep the title centred however long the user's name is */
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1em;
+    /* Run edge to edge, cancelling out the body's default margin */
+    margin: -8px -8px 1em -8px;
+    padding: 0.5em 1em;
+    background-color: #eeeeee;
+    border-bottom: 1px solid #cccccc;
+}
+
+.site-header a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.site-header-home {
+    justify-self: start;
+    font-size: 1.6em;
+    line-height: 1;
+}
+
+.site-header-title {
+    /* The site font, ubuntu-regular, only has a regular weight; the Google "Ubuntu" font has a real bold */
+    font-family: "Ubuntu", sans-serif;
+    font-size: 1.7em;
+    font-weight: 700;
+}
+
+.site-header-user {
+    justify-self: end;
+    text-align: right;
+}
+
+
+/* ---------- Page headings (fee and availability pages) ---------- */
+
+.narrow-page {
+    max-width: 30em;
+}
+
+.page-header h1 {
+    margin: 0.5em 0 0.15em 0;
+    line-height: 1.2;
+}
+
+/* Gig summary at the top of the availability and fee pages (gig_summary_header.html) */
+
+.gig-link {
+    color: inherit;
+    text-decoration: none;
+}
+
+.gig-link:hover {
+    text-decoration: underline;
+}
+
+.gig-summary-facts {
+    list-style: none;
+    margin: 0.5em 0 0 0;
+    padding: 0;
+}
+
+.gig-summary-facts li {
+    display: flex;
+    align-items: baseline;
+    gap: 0.5em;
+    /* Override the site-wide mobile list padding */
+    padding: 0.15em 0;
+}
+
+.fact-icon {
+    flex: 0 0 1.4em;
+    text-align: center;
+}
+
+.gig-summary-details {
+    margin: 0.6em 0 0 0;
+    padding-left: 0.8em;
+    border-left: 3px solid #cccccc;
+    color: #444444;
+}
+
+.page-subtitle {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.2em 0.6em;
+    margin: 1.2em 0 0 0;
+    font-size: 1.3em;
+}
+
+.page-subtitle .tiny {
+    font-size: 0.6em;
+}
+
+/* ---------- Big stacked choice buttons ---------- */
+
+.choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.choice {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 3.2em;
+    padding: 0.7em;
+    border: 2px solid grey;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+}
+
+/* A choice with no colour, e.g. Back */
+.choice-plain {
+    background: none;
+    color: inherit;
+}
+
+.fee-option {
+    background-color: #dce8f7;
+    border-color: #a9c3e6;
+    color: #3d5a80;
+}
+
+.fee-option.current {
+    background-color: #2f6fd0;
+    border-color: #1a3f7a;
+    outline: 2px solid #2f6fd0;
+    outline-offset: 2px;
+    color: white;
+    font-weight: bold;
+}
+
+#custom-fee {
+    font-size: 1em;
+    padding: 0.3em;
+    width: 5em;
+    cursor: text;
+}
+
+/* Let clicks on the disabled spinner fall through to the custom fee button */
+#custom-fee:disabled {
+    pointer-events: none;
+}
+
+/* ---------- Availability colours ---------- */
+
+.availability-AV {
+    background-color: #c8f0c6;
+    border-color: #7fc47b;
+}
+
+.availability-IF {
+    background-color: #fbeeb8;
+    border-color: #e0c55a;
+}
+
+.availability-UN {
+    background-color: #f6cdd2;
+    border-color: #d88893;
+}
+
+/* ---------- Forms (edit gig and propose gig pages, fields from form_field.html) ---------- */
+
+.form-page {
+    max-width: 36em;
+}
+
+.form-page h1 {
+    margin-bottom: 0.2em;
+}
+
+.form-section {
+    margin: 1.2em 0;
+    padding: 0.8em 1em 1em 1em;
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+}
+
+.form-section h2 {
+    display: block;
+    margin: 0 0 0.6em 0;
+    font-size: 1.2em;
+}
+
+.form-field {
+    margin-bottom: 0.9em;
+}
+
+.form-field label {
+    display: block;
+    margin-bottom: 0.25em;
+    font-weight: bold;
+}
+
+.form-field input, .form-field select, .form-field textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.5em;
+    font-size: 1em;
+    border: 1px solid #aaaaaa;
+    border-radius: 5px;
+}
+
+.form-field textarea {
+    min-height: 6em;
+}
+
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    margin-bottom: 0.9em;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.form-check input[type=checkbox] {
+    width: 1.3em;
+    height: 1.3em;
+    margin: 0;
+    zoom: 1;
+}
+
+.form-error {
+    margin: -0.6em 0 0.9em 0;
+    color: #b3261e;
+}
+
+.form-buttons {
+    display: flex;
+    gap: 10px;
+    margin: 1.5em 0;
+}
+
+.form-buttons input, .form-buttons button {
+    flex: 1;
+    width: auto;
+    padding: 0.8em;
+    font-size: 1.1em;
+    border: 1px solid #888888;
+}
+
+/* ---------- Instrument toggle cards (Players page, edit gig page) ---------- */
+
+.instrument-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7.5em, 1fr));
+    gap: 8px;
+}
+
+/* Each card is a label wrapping a hidden checkbox, so tapping it toggles the instrument */
+label.instrument-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2em;
+    padding: 0.7em 0.4em;
+    border: 2px solid #cccccc;
+    border-radius: 8px;
+    background-color: #eeeeee;
+    color: #999999;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+}
+
+.instrument-card .instrument-icon {
+    font-size: 1.8em;
+    line-height: 1.1;
+    opacity: 0.35;
+    filter: grayscale(1);
+}
+
+/* Lit up when ticked: via the .enabled class set by script, or :has() where no script runs */
+label.instrument-card.enabled, label.instrument-card:has(input:checked) {
+    background-color: #3a9d5d;
+    border-color: #26703f;
+    color: white;
+    font-weight: bold;
+}
+
+.instrument-card.enabled .instrument-icon, .instrument-card:has(input:checked) .instrument-icon {
+    opacity: 1;
+    filter: none;
+}
+
+/* Hide the checkbox itself but keep it usable from the keyboard */
+.instrument-card input[type=checkbox] {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+    margin: 0;
+}
+
+.instrument-card:focus-within {
+    outline: 2px solid #26703f;
+    outline-offset: 2px;
+}
+
+/* ---------- Players and instruments ---------- */
+
+.player-name {
+    display: inline-block;
+    border: 2px solid grey;
+    border-radius: 5px;
+    margin: 5px;
+    padding: 5px;
+}
+
+.player-name a {
+    text-decoration: none;
+}
+
+.player-container {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+}
+
+.player-with-instrument {
+    white-space: nowrap;
+    font-family: "Noto Color Emoji", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    background-color: #aaaaaa;
+    word-spacing: 0;
+    padding: 0.5em;
+    border-radius: 0.3em;
+    display: inline-block;
+    margin: 0.25em;
+}
+
+.unassigned {
+    background-color: #ff8f8f;
+}
+
+/* ---------- A link with a button to copy it, side by side at the same size ---------- */
+
+.link-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5em;
+}
+
+/* "Link copied" floats to the right of the icon without taking up space,
+   so the hidden message doesn't push the row off-centre */
+.copy-wrap {
+    position: relative;
+}
+
+.copied-message {
+    position: absolute;
+    left: 100%;
+    margin-left: 0.5em;
+    white-space: nowrap;
+}
+
+/* Just the icon, the same size as the link text */
+.copy-button {
+    padding: 0;
+    border: none;
+    background: none;
+    font-size: 1em;
+    cursor: pointer;
+}
+
+/* ---------- Desktop / mobile ---------- */
+
+@media only screen and (min-width: 1001px) {
+    .mob-only {
+        display: none;
+    }
+}
+
+@media only screen and (max-width: 1000px) {
+    label {
+        display: block;
+    }
+
+    .mob-only {
+        display: auto;
+    }
+
+    div {
+        padding-top: 0.5em;
+    }
+
+    input, textarea, select {
+        width: 100%;
+    }
+
+    input[type=checkbox] {
+        zoom: 1.5;
+        width: auto;
+    }
+
+    td {
+        padding-bottom: 5px;
+        padding-top: 5px;
+    }
+
+    button {
+        padding: 5px;
+    }
+
+    li {
+        padding-bottom: 10px;
+    }
+
+    .side-by-side-container {
+        display: flex;
+        justify-content: space-around;
+    }
+
+    .side-by-side-element {
+        width: 100%;
+        margin: 5px;
+    }
+
+    /* Columns too wide for phones */
+    .t-notes, .t-price {
+        display: none;
+    }
+
+    /* Centre text on phones as a general rule */
+    body {
+        text-align: center;
+    }
+
+    /* Keep bullets next to their centred text rather than out at the left edge */
+    ul, ol {
+        list-style-position: inside;
+        padding-left: 0;
+    }
+
+    /* Flex rows don't follow text-align, so centre them explicitly */
+    .gig-summary-facts li, .page-subtitle, .link-row, .player-container {
+        justify-content: center;
+    }
+
+    /* Centre blocks that have a max width */
+    .narrow-page {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .form-section {
+        padding: 0.8em;
+    }
+
+    .form-field {
+        /* Override the mobile div padding above */
+        padding-top: 0;
+    }
+
+    .form-check {
+        justify-content: center;
+    }
+}

@@ -1,0 +1,8 @@
+{# Gig title, when/where and details, shown at the top of the availability and fee pages #}
+<h1><a href="{% url 'view_gig' gig.id %}" class="gig-link">{{ gig.title }}</a></h1>
+<ul class="gig-summary-facts">
+    <li><span class="fact-icon">📅</span><span>{{ gig.date|date:"l j F Y" }}</span></li>
+    {% if gig.start_time %}<li><span class="fact-icon">🕖</span><span>Dancing starts at {{ gig.start_time|time:"H:i" }}</span></li>{% endif %}
+    {% if gig.location %}<li><span class="fact-icon">📍</span><span>{{ gig.location }}</span></li>{% endif %}
+</ul>
+{% if gig.details %}<p class="gig-summary-details">{{ gig.details|linebreaksbr }}</p>{% endif %}
